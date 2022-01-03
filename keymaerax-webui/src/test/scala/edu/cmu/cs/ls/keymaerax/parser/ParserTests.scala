@@ -502,6 +502,38 @@ class ParserTests extends FlatSpec with Matchers with BeforeAndAfterEach with Be
   }
   */
 
+  it should "parse skip without terminating semicolon" in {
+    Parser.parser.programParser("skip") shouldBe Test(True)
+  }
+
+  it should "parse skip with a terminating semicolon" in {
+    Parser.parser.programParser("skip;") shouldBe Test(True)
+  }
+
+  it should "parse skip as part of a sequential composition" in {
+    Parser.parser.programParser("skip;while (x>0) { x:=x; }") shouldBe
+      Compose(Test(True), Compose(Loop(Compose(Test("x>0".asFormula), Assign("x".asVariable, "x".asVariable))),
+        Test("!x>0".asFormula)))
+  }
+
+  it should "parse while without terminating semicolon" in {
+    Parser.parser.programParser("while (x>0) { x:=x; }") shouldBe
+      Compose(Loop(Compose(Test("x>0".asFormula), Assign("x".asVariable, "x".asVariable))),
+      Test("!x>0".asFormula))
+  }
+
+  it should "parse while with a terminating semicolon" in {
+    Parser.parser.programParser("while (x>0) { x:=x; };") shouldBe
+      Compose(Loop(Compose(Test("x>0".asFormula), Assign("x".asVariable, "x".asVariable))),
+        Test("!x>0".asFormula))
+  }
+
+  it should "parse while as part of a sequential composition" in {
+    Parser.parser.programParser("while (x>0) { x:=x; };skip") shouldBe
+      Compose(Compose(Loop(Compose(Test("x>0".asFormula), Assign("x".asVariable, "x".asVariable))),
+        Test("!x>0".asFormula)), Test(True))
+  }
+
   it should "parse if-then-else" in {
     Parser.parser.programParser(
       """

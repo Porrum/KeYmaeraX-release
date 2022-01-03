@@ -245,11 +245,16 @@ object OpSpec {
   //val sDiffAssign   = lBinaryOpSpec[Program](ASSIGN,  200, AtomicBinaryFormat, bintermprog, (xp:Term, e:Term) => DiffAssign(xp.asInstanceOf[DifferentialSymbol], e))
   val sAssignAny    = lUnaryOpSpecT[Program](ASSIGNANY,200, PostfixFormat, untermprog, (x:Term) => AssignAny(x.asInstanceOf[Variable]))
   val sTest         = lUnaryOpSpecF[Program](TEST,    200, PrefixFormat, unfmlprog, (f:Formula) => Test(f))
+  val sSkip         = UnitOpSpec(SKIP, 0, Test(True))
   val sIfThenElse   = TernaryOpSpec[Program](IF, LBRACE, ELSE, 260, TernaryPrefixFormat, (FormulaKind,ProgramKind,ProgramKind), (_:String, e1:Expression, e2:Expression, e3:Expression) => {
       val p = e1.asInstanceOf[Formula]
       Choice(Compose(Test(p), e2.asInstanceOf[Program]),
         Compose(Test(Not(p)), e3.asInstanceOf[Program]))
     })
+  val sWhile        = BinaryOpSpec[Program](WHILE, 260, AtomicBinaryFormat, (FormulaKind, ProgramKind),
+    (_:String, cond:Expression, prog:Expression) =>
+      Compose(Loop(Compose(Test(cond.asInstanceOf[Formula]), prog.asInstanceOf[Program])),
+        Test(Not(cond.asInstanceOf[Formula]))))
   assert(sTest>sEquiv, "tests bind weaker than their constituent formulas")
   //@note same = operator so use sEqual.prec as precedence
   val sAtomicODE    = BinaryOpSpec[Program](EQ,        90, AtomicBinaryFormat, bintermprog, (_:String, xp:Expression, e:Expression) => AtomicODE(xp.asInstanceOf[DifferentialSymbol], e.asInstanceOf[Term]))

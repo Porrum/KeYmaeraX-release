@@ -182,8 +182,10 @@ private object ASSIGN  extends OPERATOR(":=")
 private object TEST    extends OPERATOR("?") {
   override def regexp: Regex = """\?""".r
 }
+private object SKIP extends OPERATOR("skip")
 private object IF extends OPERATOR("if")
 private object ELSE extends OPERATOR("else")
+private object WHILE extends OPERATOR("while")
 private object SEMI    extends OPERATOR(";")
 private object CHOICE  extends OPERATOR("++") {
   override def regexp: Regex = """\+\+|\u222A""".r
@@ -594,9 +596,11 @@ object KeYmaeraXLexer extends (String => List[Token]) with Logging {
     RBRACE.startPattern -> ((s: String, loc: Location, _, _) => Right(consumeTerminalLength(s, RBRACE, loc))),
 
     COMMA.startPattern -> ((s: String, loc: Location, _, _) => Right(consumeTerminalLength(s, COMMA, loc))),
+    SKIP.startPattern -> ((s: String, loc: Location, _, _) => Right(consumeTerminalLength(s, SKIP, loc))),
     //
     IF.startPattern -> ((s: String, loc: Location, _, _) => Right(consumeTerminalLength(s, IF, loc))),
     ELSE.startPattern -> ((s: String, loc: Location, _, _) => Right(consumeTerminalLength(s, ELSE, loc))),
+    WHILE.startPattern -> ((s: String, loc: Location, _, _) => Right(consumeTerminalLength(s, WHILE, loc))),
     //This has to come before PLUS because otherwise ++ because PLUS,PLUS instead of CHOICE.
     CHOICE.startPattern -> ((s: String, loc: Location, _, _) => Right(consumeTerminalLength(s, CHOICE, loc))),
     //This has to come before MINUS because otherwise -- because MINUS,MINUS instead of DCHOICE.

@@ -367,7 +367,7 @@ class DLParser extends Parser {
     map({case (p,None) => p case (p,Some(inv)) => reportAnnotation(p,inv); p})
   def baseP[_: P]: P[Program] = P(( systemSymbol | programSymbol | NoCut(assign) | assignany | test | NoCut(repeat) |
     NoCut(odesystem) | NoCut(braceP) |
-    ifthen) ~ "^@".!.?).map({case (p,None) => p case (p,Some("^@")) => Dual(p)})
+    skip | ifthen) ~ "^@".!.?).map({case (p,None) => p case (p,Some("^@")) => Dual(p)})
 
   def repeat[_: P]: P[Program] = P( braceP ~ "*".! ~/ annotation.?).
     map({case (p,"*",None) => Loop(p) case (p,"*",Some(inv)) => reportAnnotation(p,inv); Loop(p)})
@@ -380,6 +380,11 @@ class DLParser extends Parser {
 
   def choice[_: P]: P[Program] = P( sequence ~ ("++" ~/ sequence).rep ).
     map({case (p, ps) => (ps.+:(p)).reduceRight(Choice)})
+
+  /** deterministic programs */
+  def skip[_: P]: P[Program] = P( "skip" ).map(_ => Test(True))
+  def whileloop[_: P]: P[Program] = P( "while" ~/ parenF ~ braceP ).
+    map({case (f, p) => Compose(Loop(Compose(Test(f), p)), Test(Not(f)))})
 
   //@note macro-expands
   def ifthen[_: P]: P[Program] = P( "if" ~/ parenF ~ braceP ~ ("else" ~/ braceP).? ).
