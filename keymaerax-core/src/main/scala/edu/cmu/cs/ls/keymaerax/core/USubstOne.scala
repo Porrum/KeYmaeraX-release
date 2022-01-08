@@ -271,6 +271,9 @@ final case class USubstOne(subsDefsInput: immutable.Seq[SubstitutionPair]) exten
       case ODESystem(ode, h) =>
         val v = u++substBoundVars(ode)
         (v, ODESystem(usubstODE(v, ode), usubst(v, h)))
+      case Dwhile(condition, ode) =>
+        val v = u++substBoundVars(ode)
+        (v, Dwhile(usubst(v, condition), usubstODE(v, ode)))
       case Choice(a, b)      => val (v,ra) = usubst(u,a); val (w,rb) = usubst(u,b); (v++w, Choice(ra, rb))
       case Compose(a, b)     => val (v,ra) = usubst(u,a); val (w,rb) = usubst(v,b); (w, Compose(ra, rb))
       // unoptimized version:  //case Loop(a) if!optima => val (v,_)  = usubst(u,a); val (_,ra) = usubst(v,a); (v, Loop(ra))

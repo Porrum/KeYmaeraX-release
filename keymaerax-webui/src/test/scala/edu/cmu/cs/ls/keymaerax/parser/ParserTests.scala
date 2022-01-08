@@ -534,6 +534,26 @@ class ParserTests extends FlatSpec with Matchers with BeforeAndAfterEach with Be
         Test("!x>0".asFormula)), Test(True))
   }
 
+  //todo start here with dwhile tests
+  it should "parse dwhile without terminating semicolon" in {
+    Parser.parser.programParser("dwhile (y<5) { x'=f(x),y'=1 }") shouldBe
+      Dwhile("y<5".asFormula, "x'=f(x),y'=1".asDifferentialProgram)
+  }
+
+  it should "parse dwhile with a terminating semicolon" in {
+    Parser.parser.programParser("dwhile (y<5) { x'=f(x),y'=1 };") shouldBe
+      Dwhile("y<5".asFormula, "x'=f(x),y'=1".asDifferentialProgram)
+  }
+
+  it should "parse dwhile as part of a sequential composition" in {
+    Parser.parser.programParser("dwhile (y<5) { x'=f(x),y'=1 };skip") shouldBe
+      Compose(Dwhile("y<5".asFormula, "x'=f(x),y'=1".asDifferentialProgram), Test(True))
+  }
+
+  it should "not parse dwhile when the breaking condition is not open" in {
+    //todo
+  }
+
   it should "parse if-then-else" in {
     Parser.parser.programParser(
       """

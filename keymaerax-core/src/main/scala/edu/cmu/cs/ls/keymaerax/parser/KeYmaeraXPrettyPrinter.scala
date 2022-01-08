@@ -338,6 +338,7 @@ class KeYmaeraXPrinter extends BasePrettyPrinter {
     //@note This is only used in printing internal data structures, not user input (ODESystem case catches user input).
     //@note no positional change since ODESystem already descended into child position
     case ode: DifferentialProgram => wrap(ppODE(q, ode), program)
+    case Dwhile(condition, ode) => statement(ppOp(program) + "(" + pp(q++0, condition) + ") { " + ppODE(q++1, ode) + " }")
     //@note forced parentheses in grammar for loops and duals
     case t: UnaryCompositeProgram => wrap(pp(q++0, t.child), program) + ppOp(program)
     case t: Compose => pwrapLeft(t, pp(q++0, t.left)) + ppOp(t) + pwrapRight(t, pp(q++1, t.right))

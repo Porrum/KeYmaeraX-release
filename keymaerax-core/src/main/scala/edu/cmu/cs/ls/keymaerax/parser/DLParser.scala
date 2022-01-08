@@ -385,6 +385,8 @@ class DLParser extends Parser {
   def skip[_: P]: P[Program] = P( "skip" ).map(_ => Test(True))
   def whileloop[_: P]: P[Program] = P( "while" ~/ parenF ~ braceP ).
     map({case (f, p) => Compose(Loop(Compose(Test(f), p)), Test(Not(f)))})
+  def dwhile[_: P]: P[Program] = P( "dwhile" ~/ parenF ~ "{" ~ ode ~ "}" ).
+    map({case (f, o) => Dwhile(f, o)})
 
   //@note macro-expands
   def ifthen[_: P]: P[Program] = P( "if" ~/ parenF ~ braceP ~ ("else" ~/ braceP).? ).

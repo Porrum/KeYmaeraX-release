@@ -255,6 +255,8 @@ object OpSpec {
     (_:String, cond:Expression, prog:Expression) =>
       Compose(Loop(Compose(Test(cond.asInstanceOf[Formula]), prog.asInstanceOf[Program])),
         Test(Not(cond.asInstanceOf[Formula]))))
+  val sDwhile        = BinaryOpSpec[Program](DWHILE, 260, AtomicBinaryFormat, (FormulaKind, DifferentialProgramKind),
+    (_:String, cond:Expression, ode:Expression) => Dwhile(cond.asInstanceOf[Formula], ode.asInstanceOf[DifferentialProgram]))
   assert(sTest>sEquiv, "tests bind weaker than their constituent formulas")
   //@note same = operator so use sEqual.prec as precedence
   val sAtomicODE    = BinaryOpSpec[Program](EQ,        90, AtomicBinaryFormat, bintermprog, (_:String, xp:Expression, e:Expression) => AtomicODE(xp.asInstanceOf[DifferentialSymbol], e.asInstanceOf[Term]))
@@ -332,6 +334,7 @@ object OpSpec {
     case p: Test         => sTest
     case p: ODESystem    => sODESystem
     case p: AtomicODE    => sAtomicODE
+    case p: Dwhile       => sDwhile
     case p: DifferentialProduct => sDifferentialProduct
     case p: Loop         => sLoop
     case p: Compose      => sCompose

@@ -727,6 +727,10 @@ case class ODESystem(ode: DifferentialProgram, constraint: Formula = True) exten
   insist(!StaticSemantics.isDifferential(constraint), "No differentials in evolution domain constraints {" + ode + " & " + constraint + "}")
 }
 
+/** Differential while loop `dwhile` evolving a system until a break condition is violated. */
+case class Dwhile(condition: Formula = False, ode: DifferentialProgram) extends Program {
+  insist(!StaticSemantics.isDifferential(condition), "No differentials in break condition {dwhile(" + condition + ") {" + ode + "}")
+}
 
 
 /**

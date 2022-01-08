@@ -245,6 +245,8 @@ object StaticSemantics {
         VCP(fv = va.fv ++ StaticSemantics(h).fv, bv = va.bv, mbv = va.mbv)
       case DifferentialProduct(a, b) => val va = progVars(a); val vb = progVars(b)
         VCP(fv = va.fv ++ vb.fv, bv = va.bv ++ vb.bv, mbv = va.mbv ++ vb.mbv)
+      case Dwhile(condition, ode) => val va = progVars(ode)
+        VCP(fv = va.fv ++ StaticSemantics(condition).fv, bv = va.bv, mbv = va.mbv)
     }
   } ensures(r => {
     val VCP(_, bv, mbv) = r; mbv.subsetOf(bv)
@@ -360,6 +362,7 @@ object StaticSemantics {
     case Dual(a)          => signature(a)
     case ODESystem(a, h)  => signature(a) ++ signature(h)
     case DifferentialProduct(a, b) => signature(a) ++ signature(b)
+    case Dwhile(condition, ode) => signature(condition) ++ signature(ode)
   }
 
 

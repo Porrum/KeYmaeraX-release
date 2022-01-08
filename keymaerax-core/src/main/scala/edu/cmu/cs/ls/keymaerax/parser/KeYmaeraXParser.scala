@@ -637,6 +637,22 @@ class KeYmaeraXParser(val LAX_MODE: Boolean) extends Parser with TokenParser wit
           else reduce(st, 7, result, sl.spanTo(el), r)
         } else reduce(st, 7, result, sl.spanTo(el), r)
 
+      // Leave parentheses around for DWHILE to find later
+      case _ :+ Token(DWHILE, _) :+ Token(LPAREN, _) :+ Expr(_, _) :+ Token(RPAREN, _) =>
+        shift(st)
+      case _ :+ Token(DWHILE, _) :+ Token(LPAREN, _) :+ Expr(_, _) :+ Token(RPAREN, _) :+ Token(LBRACE, _) =>
+        shift(st)
+
+      case r :+ (optok1@Token(tok1@DWHILE, sl)) :+ Token(LPAREN, _) :+ Expr(t1, _) :+ Token(RPAREN, _) :+ Token(LBRACE, _) :+ Expr(t2, _) :+ Token(RBRACE, el)
+        if (followsProgram(la) || la == EOF) =>
+        assume(op(st, tok1, List(t1.kind)).isInstanceOf[BinaryOpSpec[_]], "expected binary prefix operator\nin " + s)
+        val kinds = List(t1.kind, t2.kind)
+        val result = elaborate(st, optok1, op(st, tok1, kinds).asInstanceOf[BinaryOpSpec[Expression]], t1, t2, lax)
+        if (statementSemicolon) {
+          if (la==SEMI) reduce(shift(st), 8, result, sl.spanTo(el), r)
+          else reduce(st, 7, result, sl.spanTo(el), r)
+        } else reduce(st, 7, result, sl.spanTo(el), r)
+
       // parentheses for grouping
       case r :+ Token(LPAREN,_) :+ Expr(t1, loc) :+ Token(RPAREN,_) if t1.isInstanceOf[Term] || t1.isInstanceOf[Formula] =>
         assert(r.isEmpty || !r.top.isInstanceOf[IDENT], "Can no longer have an IDENT on the stack")
@@ -923,6 +939,23 @@ class KeYmaeraXParser(val LAX_MODE: Boolean) extends Parser with TokenParser wit
       case _ :+ Token(WHILE,_) :+ Token(LPAREN,_) :+ Expr(_, _) :+ Token(RPAREN,_) :+ (tok2@Token(LBRACE,_)) :+ Expr(_, _) if la == EOF =>
         throw ParseException.imbalancedError("Unmatched while", tok2, st)
 
+      case _ :+ Token(DWHILE,_) =>
+        if (firstFormula(la)) shift(st)
+        else error(st, List(FIRSTFORMULA))
+
+      case _ :+ (tok@Token(DWHILE,_)) :+ Token(LPAREN,_) :+ Expr(t1, _) =>
+        if (followsExpression(t1, la, lax) && la!=EOF) shift(st)
+        else if (la==EOF) throw ParseException.imbalancedError("Unmatched while", tok, st)
+        else if (elaboratable(FormulaKind, t1, lax).isDefined && followsFormula(la)) shift(st)
+        else error(st, List(FOLLOWSEXPRESSION))
+
+      case _ :+ Token(DWHILE,_) :+ Token(LPAREN,_) :+ Expr(_, _) :+ Token(RPAREN,_) :+ Token(LBRACE,_) =>
+        if (firstProgram(la)) shift(st)
+        else error(st, List(FIRSTPROGRAM))
+
+      case _ :+ Token(DWHILE,_) :+ Token(LPAREN,_) :+ Expr(_, _) :+ Token(RPAREN,_) :+ (tok2@Token(LBRACE,_)) :+ Expr(_, _) if la == EOF =>
+        throw ParseException.imbalancedError("Unmatched differential while", tok2, st)
+
       case _ :+ Token(LPAREN,_) =>
         if (firstFormula(la) /*|| firstTerm(la)*/ || la==RPAREN || la==ANYTHING) shift(st)
         else error(st, List(FIRSTFORMULA, RPAREN, ANYTHING))
@@ -1134,7 +1167,7 @@ class KeYmaeraXParser(val LAX_MODE: Boolean) extends Parser with TokenParser wit
     la==NOT || la==FORALL || la==EXISTS || la==LBOX || la==LDIA || la==TRUE || la==FALSE || la==PLACE /*|| la==LPAREN */
 
   /** First(Program): Is la the beginning of a new program? */
-  private def firstProgram(la: Terminal): Boolean = la.isInstanceOf[IDENT] || la==TEST || la==LBRACE || la==IF || la==WHILE || la==SKIP
+  private def firstProgram(la: Terminal): Boolean = la.isInstanceOf[IDENT] || la==TEST || la==LBRACE || la==IF || la==WHILE || la == DWHILE || la==SKIP
 
   // FOLLOW sets
 
@@ -1368,6 +1401,7 @@ class KeYmaeraXParser(val LAX_MODE: Boolean) extends Parser with TokenParser wit
       case sSkip.op => sSkip
       case sIfThenElse.op | ELSE => sIfThenElse
       case sWhile.op => sWhile
+      case sDwhile.op => sDwhile
       //      case p: ODESystem => sODESystem
       //      case p: AtomicODE => sAtomicODE
       case sDifferentialProduct.op => sDifferentialProduct
