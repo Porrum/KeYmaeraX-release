@@ -750,6 +750,7 @@ object Helpers {
     case t: BinaryCompositeProgram => pwrapLeft(t, printRecPrgJson(q ++ 0, t.left, fp), fp) ++ (op(t, fp, "topop")::Nil) ++ pwrapRight(t, printRecPrgJson(q ++ 1, t.right, fp), fp)
     case ODESystem(ode, f) if f != True => print("{", fp, "prg-open")::printJson(q ++ 0, ode, fp)::print(q, "&", "topop k4-prg-op", fp)::printJson(q ++ 1, f, fp)::print("}", fp, "prg-close")::Nil
     case ODESystem(ode, f) if f == True => print("{", fp, "prg-open")::printJson(q ++ 0, ode, fp)::print("}", fp, "prg-close")::Nil
+    case Dwhile(cond, ode) => print("{", fp, "prg-open")::op(expr, fp, "topop")::printJson(q ++ 0, cond, fp)::printJson(q ++ 1, ode, fp)::print("}", fp, "prg-close")::Nil
     case AtomicODE(xp, e) => printJson(q ++ 0, xp, fp)::op(expr, fp, "topop")::printJson(q ++ 1, e, fp)::Nil
     case t: DifferentialProduct => printJson(q ++ 0, t.left, fp)::op(t, fp, "topop")::printJson(q ++ 1, t.right, fp)::Nil
     case c: DifferentialProgramConst => print(c.prettyString, fp)::Nil
@@ -766,6 +767,7 @@ object Helpers {
     case t: BinaryCompositeProgram => pwrapLeft(t, printRecPrgJson(q ++ 0, t.left, fp), fp) ++ (op(t, fp)::Nil) ++ pwrapRight(t, printRecPrgJson(q ++ 1, t.right, fp), fp)
     case ODESystem(ode, f) if f != True => print("{", fp, "prg-open")::printJson(q ++ 0, ode, fp)::print("&", fp)::printJson(q ++ 1, f, fp)::print("}", fp, "prg-close")::Nil
     case ODESystem(ode, f) if f == True => print("{", fp, "prg-open")::printJson(q ++ 0, ode, fp)::print("}", fp, "prg-close")::Nil
+    case Dwhile(cond, ode) => print("{", fp, "prg-open")::op(expr, fp, "topop")::printJson(q ++ 0, cond, fp)::printJson(q ++ 1, ode, fp)::print("}", fp, "prg-close")::Nil
     case AtomicODE(xp, e) => printJson(q ++ 0, xp, fp)::op(expr, fp)::printJson(q ++ 1, e, fp)::Nil
     case t: DifferentialProduct => printJson(q ++ 0, t.left, fp)::op(t, fp)::printJson(q ++ 1, t.right, fp)::Nil
     case c: DifferentialProgramConst => print(c.prettyString, fp)::Nil

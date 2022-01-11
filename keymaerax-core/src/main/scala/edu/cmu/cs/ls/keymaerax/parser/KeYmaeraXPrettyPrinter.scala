@@ -169,6 +169,7 @@ object FullPrettyPrinter extends BasePrettyPrinter {
     case Test(f)                => statement(op(program).opcode + "(" + pp(f) + ")")
     case ODESystem(ode, True)   => "{" + ppODE(ode) + "}"
     case ODESystem(ode, f)      => "{" + ppODE(ode) + op(program).opcode + pp(f) + "}"
+    case Dwhile(cond, ode)      => statement(op(program).opcode + "(" + pp(cond) + ") { " + ppODE(ode) + " }")
     //@note unambiguously reparse as ODE not as equation that happens to involve a differential symbol.
     //@note This is only used in printing internal data structures, not user input.
     case ode: DifferentialProgram => "{" + ppODE(ode) + "}"

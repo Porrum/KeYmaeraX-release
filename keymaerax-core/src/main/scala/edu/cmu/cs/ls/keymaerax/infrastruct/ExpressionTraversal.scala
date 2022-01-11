@@ -242,6 +242,7 @@ object ExpressionTraversal {
         case AtomicODE(x, t) => matchTwo(p, AtomicODE.apply, f, x, t)
         case DifferentialProduct(a, b) => matchTwo(p, DifferentialProduct.apply, f, a, b)
         case ODESystem(a, h) => matchTwo(p, ODESystem(_: DifferentialProgram, _: Formula), f, a, h)
+        case Dwhile(cond, ode) => matchTwo(p, Dwhile(_: Formula, _: DifferentialProgram), f, cond, ode)
 
         case _ => fail(e)
       }) match {

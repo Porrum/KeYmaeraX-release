@@ -4,7 +4,7 @@
   */
 package edu.cmu.cs.ls.keymaerax.parser
 
-import edu.cmu.cs.ls.keymaerax.core.{Assign, AssignAny, AtomicODE, BinaryComposite, BinaryCompositeFormula, BinaryCompositeProgram, BinaryCompositeTerm, Box, ComparisonFormula, Compose, Diamond, Differential, DifferentialFormula, DifferentialProduct, DifferentialProgram, DifferentialProgramConst, DotFormula, Expression, False, Formula, FuncOf, Function, Modal, Neg, Nothing, Number, ODESystem, Pair, Power, PredOf, PredicationalOf, Program, ProgramConst, Quantified, Sequent, SystemConst, Term, Test, True, UnaryComposite, UnaryCompositeFormula, UnaryCompositeProgram, UnaryCompositeTerm, UnitPredicational}
+import edu.cmu.cs.ls.keymaerax.core.{Assign, AssignAny, AtomicODE, BinaryComposite, BinaryCompositeFormula, BinaryCompositeProgram, BinaryCompositeTerm, Box, ComparisonFormula, Compose, Diamond, Differential, DifferentialFormula, DifferentialProduct, DifferentialProgram, DifferentialProgramConst, DotFormula, Dwhile, Expression, False, Formula, FuncOf, Function, Modal, Neg, Nothing, Number, ODESystem, Pair, Power, PredOf, PredicationalOf, Program, ProgramConst, Quantified, Sequent, SystemConst, Term, Test, True, UnaryComposite, UnaryCompositeFormula, UnaryCompositeProgram, UnaryCompositeTerm, UnitPredicational}
 import edu.cmu.cs.ls.keymaerax.infrastruct.PosInExpr.HereP
 import edu.cmu.cs.ls.keymaerax.parser.OpSpec.op
 import edu.cmu.cs.ls.keymaerax.pt.ProvableSig
@@ -101,6 +101,7 @@ class KeYmaeraXPrettierPrinter(margin: Int) extends KeYmaeraXPrecedencePrinter {
     case Test(f)                => statementDoc(Doc.text(ppOp(program)) + docOf(f).nested(2)).grouped
     case ODESystem(ode, True) => wrapDoc(docOfODE(ode), program).grouped
     case ODESystem(ode, f) => wrapDoc(docOfODE(ode) + Doc.space + Doc.text(ppOp(program)) + Doc.line + docOf(f), program).grouped
+    case Dwhile(cond, ode)      => wrapDoc(Doc.text(ppOp(program)) + Doc.space + docOf(cond) + Doc.line + docOfODE(ode), program).grouped
     case ode: DifferentialProgram => (Doc.line + wrapDoc(docOfODE(ode), program) + Doc.line).grouped
     //@note all remaining unary operators are postfix, see [[OpSpec]]
     case t: UnaryCompositeProgram => (wrapDoc(docOf(t.child), program) + Doc.text(ppOp(program))).grouped
