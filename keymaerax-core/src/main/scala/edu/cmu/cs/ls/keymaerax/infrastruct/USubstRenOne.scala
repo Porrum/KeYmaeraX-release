@@ -301,6 +301,9 @@ final case class USubstRenOne(private[infrastruct] val subsDefsInput: immutable.
         //@todo rename boundVars
         val v = u++substBoundVars(ode)
         (v, ODESystem(usubstODE(v, ode), usubst(v, h)))
+      case Dwhile(cond, ode) =>
+        val v = u++substBoundVars(ode)
+        (v, Dwhile(usubst(v, cond), usubstODE(v, ode)))
       case Choice(a, b)      => val (v,ra) = usubst(u,a); val (w,rb) = usubst(u,b); (v++w, Choice(ra, rb))
       case Compose(a, b)     => val (v,ra) = usubst(u,a); val (w,rb) = usubst(v,b); (w, Compose(ra, rb))
       //case Loop(a) if!optima => val (v,_)  = usubst(u,a); val (_,ra) = usubst(v,a); (v, Loop(ra))

@@ -167,6 +167,7 @@ final case class MultiRename(rens: immutable.Seq[(Variable,Variable)], semantic:
     case Test(f)                     => Test(rename(f))
     case ODESystem(a, h)             => ODESystem(renameODE(a), rename(h))
     //@note This case happens for standalone uniform substitutions on differential programs such as x'=f() or c as they come up in unification for example.
+    case Dwhile(cond, ode)           => Dwhile(rename(cond), renameODE(ode))
     case ode: DifferentialProgram    => renameODE(ode)
     //@note the following cases are equivalent to f.reapply but are left explicit to enforce revisiting this case when data structure changes.
     // case f:BinaryCompositeProgram => f.reapply(rename(f.left), rename(f.right))
