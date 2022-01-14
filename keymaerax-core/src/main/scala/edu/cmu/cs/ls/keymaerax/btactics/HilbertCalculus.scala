@@ -250,6 +250,18 @@ trait HilbertCalculus extends UnifyUSCalculus {
   lazy val DW                 : BuiltInPositionTactic = useAt(Ax.DW)
   /** DWd: Diamond Differential Weakening to use evolution domain constraint `<{x'=f(x)&q(x)}>p(x)` reduces to `<{x'=f(x)&q(x)}>(q(x)&p(x))` */
   lazy val DWd                 : BuiltInPositionTactic = useAt(Ax.DWd)
+
+  /** DWW: Differential While Weakening to use break condition `[dwhile(c(x){x'=f(x)}]p(x)` reduces to `[dwhile(c(x)){x'=f(x))}](!c(x)->p(x))`.
+    * {{{
+    * G |- [dwhile(C){x'=f(x)}](!C->P), D
+    * ------------------------- DW(R)
+    * G |- [dwhile(C){x'=f(x)}]P, D
+    * }}}
+    * @incontext
+    * @see [[DifferentialEquationCalculus.dwW()]]
+    */
+  lazy val DWW                 : BuiltInPositionTactic = useAt(Ax.DWW)
+
   /** DC: Differential Cut a new invariant for a differential equation `[{x'=f(x)&q(x)}]p(x)` reduces to `[{x'=f(x)&q(x)&C(x)}]p(x)` with `[{x'=f(x)&q(x)}]C(x)`.
     * {{{
     * Use:                      Show:

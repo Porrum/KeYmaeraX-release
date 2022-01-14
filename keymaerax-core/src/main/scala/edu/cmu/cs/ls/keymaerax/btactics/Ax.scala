@@ -460,6 +460,9 @@ object Ax extends Logging {
   @Axiom("DWG", conclusion = "__[dwhile(C){x'=f(x)}]P__↔∃y[dwhile(C){x'=f(x),y'=(a(x)*y)+b(x)}]P", displayLevel = "browse",
     key = "0", recursor = "0;*", unifier = "surjlinear")
   val DWG: CoreAxiomInfo = coreAxiom("DWG dwhile ghost")
+  @Axiom("DWW", conclusion = "__[dwhile(c){x'=f(x)}]p ↔ [dwhile(c){x'=f(x)}](!c -> p)", displayLevel = "browse",
+    key = "0", recursor = "0;*", unifier = "surjlinear")
+  val DWW: CoreAxiomInfo = coreAxiom("DWWbase dwhile weakening base")
 
   /* DIFFERENTIAL AXIOMS */
 

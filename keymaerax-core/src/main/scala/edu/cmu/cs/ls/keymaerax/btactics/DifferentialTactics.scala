@@ -888,6 +888,44 @@ private object DifferentialTactics extends Logging {
     case None => throw new IllFormedTacticApplicationException("Position " + pos + " does not point to a valid position in sequent " + sequent.prettyString)
   })
 
+  /** [[DifferentialEquationCalculus.dwW]]. dwhileWeaken by diffCut(consts) <(diffWeakenG, V&close) */
+  @Tactic(names="dwW",
+    codeName="dwW", // todo: rename the tactic directly
+    longDisplayName="Dwhile Weaken",
+    premises="Γ<sub>const</sub>, !C |- P, Δ<sub>const</sub>",
+    conclusion="Γ |- [dwhile(C){x'=f(x)}]P, Δ",
+    contextPremises="Γ |- C( ∀x (!C→P) ), Δ",
+    contextConclusion="Γ |- C( [dwhile(C){x'=f(x)}]P ), Δ",
+    displayLevel="browse", revealInternalSteps=true)
+  private[btactics] lazy val dwhileWeaken: DependentPositionTactic = anon ((pos: Position, sequent: Sequent) =>
+    if (pos.isAnte) {
+      throw new TacticInapplicableFailure("dwW only in succedent")
+    } else if (!pos.isTopLevel) {
+      DWW(pos) & abstractionb(pos)
+    } else sequent.sub(pos) match {
+      case Some(Box(a: Dwhile, q)) =>
+        require(pos.isTopLevel && pos.isSucc, "dwW only at top level in succedent")
+
+        val primedVars = DifferentialHelper.getPrimedVariables(a.ode).toSet
+        val constFacts = sequent.zipWithPositions.flatMap({
+          case (fml, pos) =>
+            if (pos.isAnte) FormulaTools.conjuncts(fml)
+            else FormulaTools.conjuncts(fml).map(Not)
+        }).filter(f => StaticSemantics.freeVars(f).intersect(primedVars).isEmpty).reduceRightOption(And)
+
+        val p = constFacts match {
+          case Some(f) => And(Not(a.condition), f)
+          case None => Not(a.condition)
+        }
+
+        constFacts.map(DifferentialEquationCalculus.dC(_)(pos) &
+          // diffCut may not introduce the cut if it is already in there; diffCut changes the position in the show branch to 'Rlast
+          Idioms.doIf(_.subgoals.size == 2)(<(skip, V('Rlast) & prop & done))).getOrElse(skip) & DWW(pos) & G(pos) & implyR('R, Imply(p, q))
+      case Some(e) => throw new TacticInapplicableFailure("dwW only applicable to box ODEs, but got " + e.prettyString)
+      case None => throw new IllFormedTacticApplicationException("Position " + pos + " does not point to a valid position in sequent " + sequent.prettyString)
+    }
+  )
+
   //A user-friendly error message displayed when ODE can't find anything useful to do.
   private val failureMessage = "ODE automation was neither able to prove the postcondition invariant nor automatically find new ODE invariants."+
     " Try annotating the ODE with additional invariants or refining the evolution domain with a differential cut."

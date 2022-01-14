@@ -461,6 +461,12 @@ Axiom "DWG dwhile ghost"
   /* [dwhile(c){x'=f(x)}]p <-> \exists y [dwhile(c){x'=f(x)},y'=(a(x)*y)+b(x)}]p THEORY */
 End.
 
+/* Differential While Weakening */
+Axiom "DWWbase dwhile weakening base"
+  [dwhile(q(|y_|)){c{|y_|}}]p(|y_|) <-> [dwhile(q(|y_|)){c{|y_|}}](!q(|y_|) -> p(|y_|))
+  /* [dwhile(c){x'=f(x)}]p <-> [dwhile(c){x'=f(x)}](!c -> p) THEORY */
+End.
+
 /** DIFFERENTIAL AXIOMS */
 
 Axiom "c()' derive constant fn"

@@ -72,6 +72,11 @@ trait DifferentialEquationCalculus {
     * @see [[dW]] */
   lazy val dWPlus     : DependentPositionTactic = DifferentialTactics.diffWeakenPlus
 
+  /** DWW: Differential While Weakening uses evolution domain constraint so `[dwhile(q(x)){x'=f(x)}]p(x)` reduces to `\forall x (!q(x)->p(x))`.
+    * @note FV(post)/\BV(x'=f(x)) subseteq FV(q(x)) usually required to have a chance to succeed.
+    * @see [[HilbertCalculus.DWW]] */
+  lazy val dwW         : DependentPositionTactic = DifferentialTactics.dwhileWeaken
+
   /** DC: Differential Cut a new invariant, use old(x) to refer to initial values of variable x.
     * Use special function old(.) to introduce a discrete ghost for the starting value of a variable that can be
     * used in the evolution domain constraint.
