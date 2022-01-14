@@ -402,6 +402,7 @@ abstract class SchematicUnificationMatch extends BaseMatcher {
     case AssignAny(x)             => e2 match {case AssignAny(x2)    => unify(x,x2) case _ => ununifiable(e1,e2)}
     case Test(f)                  => e2 match {case Test(f2)         => unify(f,f2) case _ => ununifiable(e1,e2)}
     case ODESystem(a, h)          => e2 match {case ODESystem(a2,h2) => unifies2(a,h, a2,h2) case _ => ununifiable(e1,e2)}
+    case Dwhile(cond, ode)        => e2 match {case Dwhile(cond2, ode2) => unifies2(cond,ode, cond2,ode2) case _ => ununifiable(e1,e2)}
     case Choice(a, b)             => e2 match {case Choice(a2,b2)    => unifies2(a,b, a2,b2) case _ => ununifiable(e1,e2)}
     case Compose(a, b)            => e2 match {case Compose(a2,b2)   => unifies2(a,b, a2,b2) case _ => ununifiable(e1,e2)}
     case Loop(a)                  => e2 match {case Loop(a2)         => unify(a,a2) case _ => ununifiable(e1,e2)}

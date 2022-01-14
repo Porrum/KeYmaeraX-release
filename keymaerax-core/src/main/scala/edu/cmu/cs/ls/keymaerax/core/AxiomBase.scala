@@ -448,6 +448,19 @@ Axiom "DCC"
    * differential conditional cut (e.g., (40) in https://arxiv.org/abs/1903.00153v1) */
 End.
 
+
+/* Differential While Translation */
+Axiom "DWTr dwhile translation"
+  [dwhile(q(|x_|)){c{|x_|}}]r(|x_|) <-> [t_:=0;y_:=x_;{c{|x_|},t_'=1};?(!q(|x_|) & [s_:=0;x_:=y_;{c{|x_|},s_'=1&(s_<t_)};x_:=y_;]q(|x_|));]r(|x_|)
+  /* [dwhile(c){x'=f(x)}}p <-> [t:=0;y:=x;{x'=f(x),t'=1};?(!c & [s:=0;{y'=f(y),s'=1&(s<t)};x:=y]c)]p THEORY */
+End.
+
+/* Differential While Ghost */
+Axiom "DWG dwhile ghost"
+  [dwhile(q(|y_|)){c{|y_|}}]p(|y_|) <-> \exists y_ [dwhile(q(|y_|)){c{|y_|},y_'=(a(|y_|)*y_)+b(|y_|)}]p(|y_|)
+  /* [dwhile(c){x'=f(x)}]p <-> \exists y [dwhile(c){x'=f(x)},y'=(a(x)*y)+b(x)}]p THEORY */
+End.
+
 /** DIFFERENTIAL AXIOMS */
 
 Axiom "c()' derive constant fn"

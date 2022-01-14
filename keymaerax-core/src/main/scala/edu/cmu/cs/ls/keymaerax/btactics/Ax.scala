@@ -453,6 +453,14 @@ object Ax extends Logging {
     key = "1", recursor = "0", unifier = "linear")
   val DCC: CoreAxiomInfo = coreAxiom("DCC")
 
+  // Differential While
+  @Axiom("DWTr", conclusion = "__[dwhile(c){x'=f(x)}}p ↔ [t:=0;y:=x;{x'=f(x),t'=1};?(!c & [s:=0;{y'=f(y),s'=1&(s<t)};x:=y]c)]p", displayLevel = "browse",
+    key = "0", recursor = "0;*", unifier = "surjlinear")
+  val DWTr: CoreAxiomInfo = coreAxiom("DWTr dwhile translation")
+  @Axiom("DWG", conclusion = "__[dwhile(C){x'=f(x)}]P__↔∃y[dwhile(C){x'=f(x),y'=(a(x)*y)+b(x)}]P", displayLevel = "browse",
+    key = "0", recursor = "0;*", unifier = "surjlinear")
+  val DWG: CoreAxiomInfo = coreAxiom("DWG dwhile ghost")
+
   /* DIFFERENTIAL AXIOMS */
 
   @Axiom("c()'", conclusion = "__(c)'__=0", unifier = "linear",
