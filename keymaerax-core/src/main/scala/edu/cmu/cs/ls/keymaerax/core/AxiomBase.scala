@@ -154,8 +154,42 @@ private[core] object AxiomBase extends Logging {
       ("con convergence",
         (immutable.IndexedSeq(
             Sequent(immutable.IndexedSeq(Greater(x,Number(0)),Jany), immutable.IndexedSeq(Diamond(ProgramConst("a_", Except(x::Nil)), Diamond(Assign(x,Minus(x,Number(1))),Jany))))),
-          Sequent(immutable.IndexedSeq(Exists(immutable.IndexedSeq(x), Jany)), immutable.IndexedSeq(Diamond(Loop(ProgramConst("a_", Except(x::Nil))), Exists(immutable.Seq(x), And(LessEqual(x, Number(0)), Jany)))))))
+          Sequent(immutable.IndexedSeq(Exists(immutable.IndexedSeq(x), Jany)), immutable.IndexedSeq(Diamond(Loop(ProgramConst("a_", Except(x::Nil))), Exists(immutable.Seq(x), And(LessEqual(x, Number(0)), Jany))))))),
+
+      /**
+        * Rule "dwhile generalization".
+        * Premise: Γ |- [x'=f(x)&cl(C)]P, Δ
+        * Conclusion: Γ |- [dwhile(C)x'=f(x)]P, Δ
+        * {{{
+        *       Γ |- [x'=f(x)&cl(C)]P, Δ
+        *    ------------------------------ dwGen
+        *     Γ |- [dwhile(C)x'=f(x)]P, Δ
+        * }}}
+        */
+//      ("dwGen",
+//        (immutable.IndexedSeq(
+//          Sequent(immutable.IndexedSeq(), immutable.IndexedSeq(Box(ODESystem(AtomicODE(DifferentialSymbol(x), fany), toposemClosure(pany)), qany)))),
+//          Sequent(immutable.IndexedSeq(), immutable.IndexedSeq(Box(Dwhile(pany, AtomicODE(DifferentialSymbol(x), fany)), qany)))))
     )
+  }
+
+  private def toposemClosure(f: Formula): Formula = {
+    f match {
+      case Less(t1: Term, t2: Term) => LessEqual(t1, t2)
+      case Greater(t1: Term, t2: Term) => GreaterEqual(t1, t2)
+      case PredicationalOf(fun: Function, form: Formula) => PredicationalOf(fun, toposemClosure(form))
+      case Not(formula: Formula) => Not(toposemClosure(formula))
+      case DifferentialFormula(formula: Formula) => DifferentialFormula(toposemClosure(formula))
+      case And(f1: Formula, f2: Formula) => And(toposemClosure(f1), toposemClosure(f2))
+      case Or(f1: Formula, f2: Formula) => Or(toposemClosure(f1), toposemClosure(f2))
+      case Imply(f1: Formula, f2: Formula) => Imply(toposemClosure(f1), toposemClosure(f2))
+      case Equiv(f1: Formula, f2: Formula) => Equiv(toposemClosure(f1), toposemClosure(f2))
+      case Forall(x: Variable, formula: Formula) => Forall(x, toposemClosure(formula))
+      case Exists(x: Variable, formula: Formula) => Exists(x, toposemClosure(formula))
+      case Box(p: Program, formula: Formula) => Box(p, toposemClosure(formula))
+      case Diamond(p: Program, formula: Formula) => Diamond(p, toposemClosure(formula))
+      case _ => f
+    }
   }
 
   /**
@@ -465,6 +499,12 @@ End.
 Axiom "DWWbase dwhile weakening base"
   [dwhile(q(|y_|)){c{|y_|}}]p(|y_|) <-> [dwhile(q(|y_|)){c{|y_|}}](!q(|y_|) -> p(|y_|))
   /* [dwhile(c){x'=f(x)}]p <-> [dwhile(c){x'=f(x)}](!c -> p) THEORY */
+End.
+
+/* Differential While Generalization */
+Axiom "DWGen dwhile generalization base"
+  ([{c&cl(q())}]p() -> [dwhile(q()){c}]p()) <-> true
+  /* [x'=f(x)&cl(c)]p -> [dwhile(c){x'=f(x)}](p) THEORY */
 End.
 
 /** DIFFERENTIAL AXIOMS */

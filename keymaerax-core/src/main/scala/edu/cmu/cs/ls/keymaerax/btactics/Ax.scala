@@ -334,6 +334,13 @@ object Ax extends Logging {
   @ProofRule
   val conrule: AxiomaticRuleInfo = coreRule("con convergence")
 
+  //TODO lift this out of the core
+//  @ProofRule(codeName = "dwGen", longDisplayName = "dwhile Generalization",
+//    premises = "Γ |- [x'=f(x)&cl(C)]P, Δ",
+//    conclusion = "Γ |- [dwhile(C)x'=f(x)]P, Δ",
+//    displayLevel = "browse")
+//  val dwGen: AxiomaticRuleInfo = coreRule("dwGen")
+
 
   //***************
   // Core Axioms   see [[AxiomBase]]
@@ -463,6 +470,9 @@ object Ax extends Logging {
   @Axiom("DWW", conclusion = "__[dwhile(c){x'=f(x)}]p ↔ [dwhile(c){x'=f(x)}](!c -> p)", displayLevel = "browse",
     key = "0", recursor = "0;*", unifier = "surjlinear")
   val DWW: CoreAxiomInfo = coreAxiom("DWWbase dwhile weakening base")
+  @Axiom("DWGen", conclusion = "__[x'=f(x)&cl(c)]p -> [dwhile(c){x'=f(x)}](p)", displayLevel = "browse",
+    key = "0", recursor = "0;*", unifier = "surjlinear")
+  val DWGen: CoreAxiomInfo = coreAxiom("DWGen dwhile generalization base")
 
   /* DIFFERENTIAL AXIOMS */
 

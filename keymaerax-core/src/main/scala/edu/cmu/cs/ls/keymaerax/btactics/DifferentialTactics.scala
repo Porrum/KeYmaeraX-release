@@ -890,7 +890,7 @@ private object DifferentialTactics extends Logging {
 
   /** [[DifferentialEquationCalculus.dwW]]. dwhileWeaken by diffCut(consts) <(diffWeakenG, V&close) */
   @Tactic(names="dwW",
-    codeName="dwW", // todo: rename the tactic directly
+    codeName="dwW",
     longDisplayName="Dwhile Weaken",
     premises="Γ<sub>const</sub>, !C |- P, Δ<sub>const</sub>",
     conclusion="Γ |- [dwhile(C){x'=f(x)}]P, Δ",
