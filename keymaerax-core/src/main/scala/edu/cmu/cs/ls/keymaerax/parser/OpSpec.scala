@@ -209,6 +209,7 @@ object OpSpec {
   val sPredOf       = UnaryOpSpec(none,                 0, PrefixFormat, untermfml, (name, e:Expression) => PredOf(func(name, None, e.sort, Bool), e.asInstanceOf[Term]))
   val sPredicationalOf = UnaryOpSpec(none,              0, PrefixFormat, unfml, (name, e:Formula) => PredicationalOf(func(name, None, e.sort, Bool), e.asInstanceOf[Formula]))
   val sUnitPredicational= UnitOpSpec(none,              0, name => UnitPredicational(name,AnyArg))
+  val sClosure      = UnaryOpSpec[Formula](CLOSURE, 70, PrefixFormat, unfml, Closure.apply _)
   val sDifferentialFormula = UnaryOpSpec[Formula](PRIME,80, PostfixFormat, unfml, DifferentialFormula.apply _)
   val sEqual        = lBinaryOpSpec(EQ,                90, AtomicBinaryFormat, bintermfml, Equal.apply _)
   assert(sEqual>sMinus, "formulas bind weaker than their constituent terms")
@@ -324,6 +325,7 @@ object OpSpec {
     case f: Imply        => sImply
     case f: Equiv        => sEquiv
     case f: UnitPredicational => sUnitPredicational
+    case f: Closure      => sClosure
 
     // programs
     case p: ProgramConst => sProgramConst

@@ -905,7 +905,8 @@ case class ApplyDefTactic(t: DefTactic) extends BelleExpr {
   override def prettyString: String = t.name
 }
 
-object Expand {
+object
+Expand {
   def apply(name: NamedSymbol, s: SubstitutionPair): Expand = Expand(name, Some(s))
 }
 

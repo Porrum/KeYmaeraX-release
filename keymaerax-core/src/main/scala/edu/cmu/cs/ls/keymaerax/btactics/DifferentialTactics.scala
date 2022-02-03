@@ -930,6 +930,23 @@ private object DifferentialTactics extends Logging {
   private val failureMessage = "ODE automation was neither able to prove the postcondition invariant nor automatically find new ODE invariants."+
     " Try annotating the ODE with additional invariants or refining the evolution domain with a differential cut."
 
+  /** [[DifferentialEquationCalculus.dwGen]]. dwhileGeneralization */
+  @Tactic(names="dwGen",
+    codeName="dwGen",
+    longDisplayName="Dwhile Generalization",
+    premises="Γ |- [x'=f(x)&cls(Q)]P, Δ",
+    conclusion="Γ |- [dwhile(Q){x'=f(x)}]P, Δ",
+    displayLevel="browse", revealInternalSteps = true)
+  val dwGeneralization: DependentPositionTactic = anon { (pos: Position, seq: Sequent) =>
+    pos.checkTop
+    seq.sub(pos) match {
+      case Some(Box(Dwhile(cond, ode), post)) =>
+        cutR(Box(ODESystem(ode, Closure(cond)), post))(pos) <(skip,useAt(Ax.DWGen)(pos) & closeT)
+      case Some(e) => throw new TacticInapplicableFailure("dwGen only applicable to box differential while loops, but got " + e.prettyString)
+      case None => throw new IllFormedTacticApplicationException("Position " + pos + " does not point to a valid position in sequent " + seq.prettyString)
+    }
+  }
+
   /** Assert LZZ succeeds at a certain position. */
   lazy val lzzCheck: BuiltInPositionTactic = {
     def constConditions(formulas: IndexedSeq[Formula], taboo: SetLattice[Variable]): IndexedSeq[Formula] = {
@@ -2194,16 +2211,20 @@ private object DifferentialTactics extends Logging {
   case class ODESpecific(ode: DifferentialProgram, variant: String => String = _ + "_") {
     private val vars = DifferentialHelper.getPrimedVariables(ode)
     private val vvars = vars.zipWithIndex.map(vi => Variable(variant(vi._1.name), vi._1.index))
-    private val ode2 = (vars,vvars).zipped.foldLeft(ode)((a, b) => URename(b._1, b._2)(a))
+    private val ode2 = (vars, vvars).zipped.foldLeft(ode)((a, b) => URename(b._1, b._2)(a))
 
-    private def tuple_of_list(ts: List[Term]) : Term = ts match {
+    private def tuple_of_list(ts: List[Term]): Term = ts match {
       case Nil => Nothing
-      case t::Nil => t
-      case t::ts => Pair(t, tuple_of_list(ts))
+      case t :: Nil => t
+      case t :: ts => Pair(t, tuple_of_list(ts))
     }
+
     private[btactics] def p(vs: List[Term]) = FuncOf(Function("p_", None, tuple_of_list(vs).sort, Real), tuple_of_list(vs))
+
     private[btactics] def P(vs: List[Term]) = PredOf(Function("P_", None, tuple_of_list(vs).sort, Bool), tuple_of_list(vs))
+
     private[btactics] def q(vs: List[Term]) = FuncOf(Function("q_", None, tuple_of_list(vs).sort, Real), tuple_of_list(vs))
+
     private[btactics] def r(vs: List[Term]) = PredOf(Function("r_", None, tuple_of_list(vs).sort, Bool), tuple_of_list(vs))
 
     private[btactics] val q_pat = q(vars)
@@ -2211,18 +2232,19 @@ private object DifferentialTactics extends Logging {
     private[btactics] val P_pat = P(vars)
 
     private def pos(t: Term) = Greater(t, Number(0))
+
     private def nonneg(t: Term) = GreaterEqual(t, Number(0))
 
     /**
-      * A lemma of the following form for tuples x of dimension n
-      * (
-      *   P(x)                             &
-      *   [{x'=f(x) & r(x) & P(x)}] q(x)>0  &
-      *   \forall x [{x'=f(x) & r(x) & q(x)>=0}] P(x)' &
-      *   \forall x P(x) <-> p(x)>=0
-      * ) ->
-      *     [{x'=f(x) & r(x)}] P(x)
-      * */
+     * A lemma of the following form for tuples x of dimension n
+     * (
+     * P(x)                             &
+     * [{x'=f(x) & r(x) & P(x)}] q(x)>0  &
+     * \forall x [{x'=f(x) & r(x) & q(x)>=0}] P(x)' &
+     * \forall x P(x) <-> p(x)>=0
+     * ) ->
+     * [{x'=f(x) & r(x)}] P(x)
+     * */
     val dIopenClosedProvable: ProvableSig =
       proveBy(
         Imply(
@@ -2249,55 +2271,55 @@ private object DifferentialTactics extends Logging {
           //@todo always check with doIfElse or TryCatch instead?
           Idioms.doIfElse(_.subgoals.forall(s => !StaticSemantics.symbols(s(SuccPos(0))).contains("t_".asVariable)))(
             useAt(Ax.RIclosedgeq)(1) &
-            andR(1) &
-            Idioms.<(FOQuantifierTactics.allLs(vars)('Llast) & prop & done, skip) &
-            composeb(1) &
-            DW(1) &
-            TactixLibrary.generalize(pos(q(vars)))(1) &
-            Idioms.<(
-              id,
-              implyR(1) &
-                assignb(1) &
+              andR(1) &
+              Idioms.<(FOQuantifierTactics.allLs(vars)('Llast) & prop & done, skip) &
+              composeb(1) &
+              DW(1) &
+              TactixLibrary.generalize(pos(q(vars)))(1) &
+              Idioms.<(
+                id,
                 implyR(1) &
-                /* @TODO: the following is somewhat close to ODEInvariance.lpstep */
-                cutR(Or(pos(p(vars)), Equal(p(vars), Number(0))))(1) & Idioms.<(
-                useAt(ODEInvariance.geq, PosInExpr(1 :: Nil))(1) & prop & done,
-                implyR(1) &
-                orL('Llast) < (
-                  useAt(ODEInvariance.contAx, PosInExpr(1 :: Nil))(1) & prop & done,
-                  dR(And(r(vars), nonneg(q(vars))), hide=false)(1) & Idioms.<(
-                    useAt(Ax.UniqIff, PosInExpr(1 :: Nil))(1) &
-                    andR(1) & Idioms.<(id, useAt(ODEInvariance.contAx, PosInExpr(1 :: Nil))(1) & id)
-                    ,
-                    andL('L) &
-                    TactixLibrary.generalize(P(vars))(1) & Idioms.<(skip, andL(-1) & FOQuantifierTactics.allLs(vars)('Llast) & prop & done) &
-                    DI(1) & implyR(1) & andR(1) & Idioms.<(
-                      FOQuantifierTactics.allLs(vars)(-7) & prop & done
-                      ,
-                      cohideOnlyL(-6) &
-                      FOQuantifierTactics.allLs(vars)(-1) &
-                      DifferentialTactics.inverseDiffGhost(1) &
-                      derive(1, 1 :: Nil) &
-                      id
+                  assignb(1) &
+                  implyR(1) &
+                  /* @TODO: the following is somewhat close to ODEInvariance.lpstep */
+                  cutR(Or(pos(p(vars)), Equal(p(vars), Number(0))))(1) & Idioms.<(
+                  useAt(ODEInvariance.geq, PosInExpr(1 :: Nil))(1) & prop & done,
+                  implyR(1) &
+                    orL('Llast) < (
+                      useAt(ODEInvariance.contAx, PosInExpr(1 :: Nil))(1) & prop & done,
+                      dR(And(r(vars), nonneg(q(vars))), hide = false)(1) & Idioms.<(
+                        useAt(Ax.UniqIff, PosInExpr(1 :: Nil))(1) &
+                          andR(1) & Idioms.<(id, useAt(ODEInvariance.contAx, PosInExpr(1 :: Nil))(1) & id)
+                        ,
+                        andL('L) &
+                          TactixLibrary.generalize(P(vars))(1) & Idioms.<(skip, andL(-1) & FOQuantifierTactics.allLs(vars)('Llast) & prop & done) &
+                          DI(1) & implyR(1) & andR(1) & Idioms.<(
+                          FOQuantifierTactics.allLs(vars)(-7) & prop & done
+                          ,
+                          cohideOnlyL(-6) &
+                            FOQuantifierTactics.allLs(vars)(-1) &
+                            DifferentialTactics.inverseDiffGhost(1) &
+                            derive(1, 1 :: Nil) &
+                            id
+                        )
+                      )
                     )
-                  )
                 )
-              )
-            ),
+              ),
             DebuggingTactics.error("Inapplicable: t_ occurs")
           )
       )
 
     /**
-      * If P is a closed set (i.e., can be normalized to p(x)>=0), applies differential induction by assuming P(x) in
-      * the domain constraint and P(x)' <-> q(x)>=0 pointing strictly inwards ( q(x)>0 )
-      *
-      * if P(x)' normalizes to q(x)>=0:
-      *
-      * P(x)            [{x'=f(x) & r(x) & P(x)}] q(x)>0
-      * ------------------------------------------------ dIClosed
-      *             [{x'=f(x) & r(x)}] P(x)
-      *  */
+     * If P is a closed set (i.e., can be normalized to p(x)>=0), applies differential induction by assuming P(x) in
+     * the domain constraint and P(x)' <-> q(x)>=0 pointing strictly inwards ( q(x)>0 )
+     *
+     * if P(x)' normalizes to q(x)>=0:
+     *
+     * P(x)            [{x'=f(x) & r(x) & P(x)}] q(x)>0
+     * ------------------------------------------------ dIClosed
+     * [{x'=f(x) & r(x)}] P(x)
+     * */
     val dIClosed: DependentPositionTactic = anon { (pos: Position, seq: Sequent) =>
       pos.checkTop
       seq.sub(pos) match {
@@ -2315,21 +2337,21 @@ private object DifferentialTactics extends Logging {
             (GreaterEqual(q, Number(nq)), _)) if np == 0 && nq == 0 =>
               toc("== maxMinGeqNormalize")
               val usubst = (UnificationMatch(p_pat, p) ++ UnificationMatch(q_pat, q) ++ UnificationMatch(P_pat, post)).usubst
-              useAt(dIopenClosedProvable(usubst), PosInExpr(1::Nil))(pos) &
-                andR(pos) & Idioms.<( skip, andR(pos) & Idioms.<(skip, andR(pos))) &
+              useAt(dIopenClosedProvable(usubst), PosInExpr(1 :: Nil))(pos) &
+                andR(pos) & Idioms.<(skip, andR(pos) & Idioms.<(skip, andR(pos))) &
                 Idioms.<(
-                  skip /* initial condition */,
+                  skip /* initial condition */ ,
                   tocTac("== Tactic start") &
-                    dW(pos) & implyRi /* (open) differential invariant */,
+                    dW(pos) & implyRi /* (open) differential invariant */ ,
                   tocTac("== dW") &
-                    cohideR(pos) & allR(pos)*vars.length & derive(pos++PosInExpr(1::Nil)) &
-                    DE(pos) & Dassignb(pos ++ PosInExpr(1::Nil))*vars.length & dW(pos) &
+                    cohideR(pos) & allR(pos) * vars.length & derive(pos ++ PosInExpr(1 :: Nil)) &
+                    DE(pos) & Dassignb(pos ++ PosInExpr(1 :: Nil)) * vars.length & dW(pos) &
                     tocTac("== DE") &
                     QE & done,
                   tocTac("== QE") &
-                    cohideR(pos) & allR(pos)*vars.length &
-                    (if (post_semi._2.isEmpty) skip else useAt(post_semi._2.get, PosInExpr(0::Nil))(1, 0::Nil)) &
-                    (if (post_prv.isEmpty) skip else useAt(post_prv.get, PosInExpr(0::Nil))(1, 0::Nil)) &
+                    cohideR(pos) & allR(pos) * vars.length &
+                    (if (post_semi._2.isEmpty) skip else useAt(post_semi._2.get, PosInExpr(0 :: Nil))(1, 0 :: Nil)) &
+                    (if (post_prv.isEmpty) skip else useAt(post_prv.get, PosInExpr(0 :: Nil))(1, 0 :: Nil)) &
                     byUS(Ax.equivReflexive) &
                     done
                 )
@@ -2341,5 +2363,4 @@ private object DifferentialTactics extends Logging {
       }
     }
   }
-
 }

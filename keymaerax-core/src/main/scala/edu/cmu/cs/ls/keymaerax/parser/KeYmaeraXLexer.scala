@@ -174,6 +174,8 @@ private object EXISTS_UNICODE extends OPERATOR("∃")
 private object TRUE    extends OPERATOR("true")
 private object FALSE   extends OPERATOR("false")
 
+private object CLOSURE extends OPERATOR("cls")
+
 //@todo should probably also allow := *
 private object ASSIGNANY extends OPERATOR(":=*") {
   override def regexp: Regex = """:=\*""".r
@@ -638,6 +640,8 @@ object KeYmaeraXLexer extends (String => List[Token]) with Logging {
     UNEQUAL_UNICODE.startPattern -> ((s: String, loc: Location, _, _) => Right(consumeUnicodeTerminalLength(s, UNEQUAL_UNICODE, loc, NOTEQ))),
     TRUE.startPattern -> ((s: String, loc: Location, _, _) => Right(consumeTerminalLength(s, TRUE, loc))),
     FALSE.startPattern -> ((s: String, loc: Location, _, _) => Right(consumeTerminalLength(s, FALSE, loc))),
+    //
+    CLOSURE.startPattern -> ((s: String, loc: Location, _, _) => Right(consumeTerminalLength(s, CLOSURE, loc))),
     //
     ANYTHING.startPattern -> ((s: String, loc: Location, _, _) => Right(consumeTerminalLength(s, ANYTHING, loc))), //@note this token is stripped out and replaced with (! !) in [[fin`dNextToken]].
     //

@@ -250,6 +250,9 @@ final case class USubstOne(subsDefsInput: immutable.Seq[SubstitutionPair]) exten
         case Some(subs) => subs.repl.asInstanceOf[Formula]
         case None => p
       }
+
+      //toposemantic closure
+      case Closure(g) =>Closure(usubst(u, g))
     }
   }
 

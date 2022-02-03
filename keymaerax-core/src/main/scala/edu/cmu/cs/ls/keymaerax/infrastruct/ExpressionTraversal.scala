@@ -210,6 +210,7 @@ object ExpressionTraversal {
         case Forall(v, a) => matchOne(p, Forall(v, _: Formula), f, a)
         case Exists(v, a) => matchOne(p, Exists(v, _: Formula), f, a)
         case DifferentialFormula(a) => matchOne(p, DifferentialFormula.apply, f, a)
+        case Closure(a) => matchOne(p, Closure.apply, f, a)
 
         // Terms
         case Number(_) => matchZero(p, f, e)

@@ -606,6 +606,10 @@ case class Diamond(program: Program, child: Formula) extends Modal { def reapply
   * In theory they are only used in the form (e>=k)' which is (e)'>=(k)'. In practice, derived forms are useful. */
 case class DifferentialFormula(child: Formula) extends UnaryCompositeFormula { def reapply = copy }
 
+/** The toposemantic closure of a formula such that its semantics is the topological closure of the original formula.
+  * It is used for generalization from differential while to general differential dynamics. */
+case class Closure(child: Formula) extends UnaryCompositeFormula { def reapply = copy }
+
 /*********************************************************************************
   * Programs of differential dynamic logic
   *********************************************************************************

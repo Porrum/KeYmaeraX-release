@@ -470,9 +470,48 @@ object Ax extends Logging {
   @Axiom("DWW", conclusion = "__[dwhile(c){x'=f(x)}]p ↔ [dwhile(c){x'=f(x)}](!c -> p)", displayLevel = "browse",
     key = "0", recursor = "0;*", unifier = "surjlinear")
   val DWW: CoreAxiomInfo = coreAxiom("DWWbase dwhile weakening base")
-  @Axiom("DWGen", conclusion = "__[x'=f(x)&cl(c)]p -> [dwhile(c){x'=f(x)}](p)", displayLevel = "browse",
+  @Axiom("DWGen", conclusion = "(__[x'=f(x)&cl(c)]p -> [dwhile(c){x'=f(x)}](p)) ↔ true", displayLevel = "browse",
     key = "0", recursor = "0;*", unifier = "surjlinear")
   val DWGen: CoreAxiomInfo = coreAxiom("DWGen dwhile generalization base")
+
+  /* TOPOSEMANTIC CLOSURE */
+  @Axiom("closure <", conclusion = "cls(f < g) ↔ (f <= g)", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureLess: CoreAxiomInfo = coreAxiom("closure <")
+  @Axiom("closure >", conclusion = "cls(f > g) ↔ (f >= g)", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureGreater: CoreAxiomInfo = coreAxiom("closure >")
+  //@Axiom("closure predicational", conclusion = "cls(f(q)) ↔ f(cls(q))", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+  //  val closurePred: CoreAxiomInfo = coreAxiom("closure predicational")
+  @Axiom("closure not", conclusion = "cls(!q) ↔ !(cls(q)", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureNot: CoreAxiomInfo = coreAxiom("closure not")
+  @Axiom("closure differential", conclusion = "cls(q') ↔ (cls(q))'", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureDiff: CoreAxiomInfo = coreAxiom("closure differential")
+  @Axiom("closure ∧", conclusion = "cls(p ∧ q) ↔ (cls(p) ∧ cls(q))", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureAnd: CoreAxiomInfo = coreAxiom("closure &")
+  @Axiom("closure ∨", conclusion = "cls(p ∨ q) ↔ (cls(p) ∨ cls(q))", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureOr: CoreAxiomInfo = coreAxiom("closure |")
+  @Axiom("closure →", conclusion = "cls(p → q) ↔ (cls(p) → cls(q))", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureImply: CoreAxiomInfo = coreAxiom("closure ->")
+  @Axiom("closure ↔", conclusion = "cls(p <-> q) ↔ (cl(p()) <-> cls(q))", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureEquiv: CoreAxiomInfo = coreAxiom("closure <->")
+  @Axiom("closure ∀", conclusion = "cls(∀x q) ↔ (∀x cls(q))", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureForall: CoreAxiomInfo = coreAxiom("closure forall")
+  @Axiom("closure ∃", conclusion = "cls(∃x q) ↔ (∃x cls(q))", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureExists: CoreAxiomInfo = coreAxiom("closure exists")
+  @Axiom("closure []", conclusion = "cls([a;]q) ↔ ([a;]cls(q))", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureBox: CoreAxiomInfo = coreAxiom("closure []")
+  @Axiom("closure <>", conclusion = "cls(<a;>q) ↔ (<a;>cls(q))", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureDiamond: CoreAxiomInfo = coreAxiom("closure <>")
+
+  @Axiom("closure <=", conclusion = "cls(f <= g) ↔ (f <= g)", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureLessEqual: CoreAxiomInfo = coreAxiom("closure <=")
+  @Axiom("closure >=", conclusion = "cls(f >= g) ↔ (f >= g)", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureGreaterEqual: CoreAxiomInfo = coreAxiom("closure >=")
+  @Axiom("closure =", conclusion = "cls(f = g) ↔ (f = g)", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureEqual: CoreAxiomInfo = coreAxiom("closure =")
+  @Axiom("closure true", conclusion = "cls(true) ↔ true", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureTrue: CoreAxiomInfo = coreAxiom("closure true")
+  @Axiom("closure false", conclusion = "cls(false) ↔ false", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+    val closureFalse: CoreAxiomInfo = coreAxiom("closure false")
 
   /* DIFFERENTIAL AXIOMS */
 

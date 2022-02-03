@@ -195,6 +195,8 @@ object StaticSemantics {
     case Imply(l, r) => fmlVars(l) ++ fmlVars(r)
     case Equiv(l, r) => fmlVars(l) ++ fmlVars(r)
 
+    case Closure(g) => fmlVars(g)
+
     // quantifier binding cases omit bound vars from fv and add bound variables to bf
     case Forall(vars, g) => val vg = fmlVars(g); VCF(fv = vg.fv -- vars, bv = vg.bv ++ vars)
     case Exists(vars, g) => val vg = fmlVars(g); VCF(fv = vg.fv -- vars, bv = vg.bv ++ vars)
@@ -337,6 +339,8 @@ object StaticSemantics {
     case Diamond(p, g) => signature(p) ++ signature(g)
 
     case DifferentialFormula(g) => signature(g)
+
+    case Closure(g) => signature(g)
   }
 
   /**

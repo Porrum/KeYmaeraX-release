@@ -11,14 +11,12 @@ object InterpretedSymbols {
   val maxF: Function = Function("max", None, Tuple(Real, Real), Real, interpreted = true)
   val minF: Function = Function("min", None, Tuple(Real, Real), Real, interpreted = true)
   val absF: Function = Function("abs", None, Real, Real, interpreted = true)
-  val closureF: Function = Function("cl", None, Bool, Bool, interpreted = true)
 
   /** The interpreted function symbols. */
   val symbols: List[Function] = List(
       absF,
       minF,
       maxF,
-      closureF,
   ) ensures(r => r.forall(f => f.interpreted), "only interpreted symbols are interpreted")
 
   /** The interpreted symbols by name. */

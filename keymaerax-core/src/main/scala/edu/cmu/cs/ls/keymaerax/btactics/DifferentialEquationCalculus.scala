@@ -9,6 +9,8 @@ import edu.cmu.cs.ls.keymaerax.core._
 import edu.cmu.cs.ls.keymaerax.infrastruct.Position
 import edu.cmu.cs.ls.keymaerax.btactics.macros.Tactic
 import edu.cmu.cs.ls.keymaerax.btactics.TacticFactory._
+import edu.cmu.cs.ls.keymaerax.btactics.TactixLibrary.{closeT, cutR, skip, useAt}
+import edu.cmu.cs.ls.keymaerax.infrastruct.Augmentors.SequentAugmentor
 
 import scala.collection.immutable._
 
@@ -76,6 +78,9 @@ trait DifferentialEquationCalculus {
     * @note FV(post)/\BV(x'=f(x)) subseteq FV(q(x)) usually required to have a chance to succeed.
     * @see [[HilbertCalculus.DWW]] */
   lazy val dwW         : DependentPositionTactic = DifferentialTactics.dwhileWeaken
+
+  /** dwGen: Differential While Generalization generalizes dwhile to an ODE system. */
+  lazy val dwGen       : DependentPositionTactic = DifferentialTactics.dwGeneralization
 
   /** DC: Differential Cut a new invariant, use old(x) to refer to initial values of variable x.
     * Use special function old(.) to introduce a discrete ghost for the starting value of a variable that can be
@@ -361,5 +366,7 @@ trait DifferentialEquationCalculus {
     * @param hide whether to keep the extra succedents (D) around (default true), which makes position management easier
     */
   def dR(formula: Formula, hide: Boolean=true): DependentPositionTactic = DifferentialTactics.diffRefine(formula,hide)
+
+
 
 }

@@ -262,6 +262,8 @@ final case class USubstRenOne(private[infrastruct] val subsDefsInput: immutable.
       case Imply(l, r) => Imply(usubst(u, l), usubst(u, r))
       case Equiv(l, r) => Equiv(usubst(u, l), usubst(u, r))
 
+      case Closure(g)  => Closure(usubst(u, g))
+
       // NOTE DifferentialFormula in analogy to Differential
       case DifferentialFormula(g) => DifferentialFormula(usubst(allVars, g))
 
@@ -383,6 +385,7 @@ final case class USubstRenOne(private[infrastruct] val subsDefsInput: immutable.
       //@note system generalization of x'=e&h
       case ODESystem(a, h)             => substBoundVars(a)
       case DifferentialProduct(a, b)   => substBoundVars(a) ++ substBoundVars(b)
+      case Dwhile(cond, ode)           => substBoundVars(ode)
     }
   }
 }

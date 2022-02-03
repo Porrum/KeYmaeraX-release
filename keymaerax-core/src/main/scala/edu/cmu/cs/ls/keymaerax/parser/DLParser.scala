@@ -337,6 +337,8 @@ class DLParser extends Parser {
 
   def implicational[_: P]: P[Formula] = P(NoCut(backimplication) | implication)
 
+  def closure[_: P]: P[Formula] = P("cl" ~/ conjunct ).map(f => Closure(f))
+
   /** formula: Parses a dL formula. */
   def formula[_: P]: P[Formula] = P( implicational ~ ("<->" ~/ implicational).? ).
     map({case (l,None) => l case (l,Some(r)) => Equiv(l,r)})

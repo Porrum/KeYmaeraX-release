@@ -379,6 +379,8 @@ abstract class SchematicUnificationMatch extends BaseMatcher {
     case Imply(l, r) => e2 match {case Imply(l2,r2) => unifies2(l,r, l2,r2) case _ => ununifiable(e1,e2)}
     case Equiv(l, r) => e2 match {case Equiv(l2,r2) => unifies2(l,r, l2,r2) case _ => ununifiable(e1,e2)}
 
+    case Closure(g)  => e2 match {case Closure(g2)  => unify(g,g2) case _ => ununifiable(e1,e2)}
+
     // NOTE DifferentialFormula in analogy to Differential
     case DifferentialFormula(g) => e2 match {case DifferentialFormula(g2) => unify(g,g2) case _ => ununifiable(e1,e2)}
 

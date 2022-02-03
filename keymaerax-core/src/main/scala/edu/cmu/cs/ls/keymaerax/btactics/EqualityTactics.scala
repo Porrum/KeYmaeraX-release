@@ -1,6 +1,7 @@
 package edu.cmu.cs.ls.keymaerax.btactics
 
 import edu.cmu.cs.ls.keymaerax.bellerophon._
+import edu.cmu.cs.ls.keymaerax.btactics.Ax.{closureGreater, closureGreaterEqual, closureLess, closureLessEqual}
 import edu.cmu.cs.ls.keymaerax.btactics.Idioms.{?, mapSubpositions}
 import edu.cmu.cs.ls.keymaerax.btactics.TactixLibrary._
 import edu.cmu.cs.ls.keymaerax.btactics.TacticFactory._
@@ -11,6 +12,7 @@ import edu.cmu.cs.ls.keymaerax.infrastruct.Augmentors._
 import edu.cmu.cs.ls.keymaerax.infrastruct.StaticSemanticsTools._
 import edu.cmu.cs.ls.keymaerax.infrastruct._
 import edu.cmu.cs.ls.keymaerax.btactics.macros.Tactic
+import edu.cmu.cs.ls.keymaerax.core
 import edu.cmu.cs.ls.keymaerax.parser.InterpretedSymbols
 import edu.cmu.cs.ls.keymaerax.pt.ProvableSig
 
@@ -644,5 +646,34 @@ private object EqualityTactics {
         case _ => None
       })
     tactics.foldLeft(provable)({ (pr, r) => pr(r, 0) })
+  }
+
+  @Tactic(codeName = "closureExpandStep", longDisplayName = "Expand Closure Step")
+  val expandClosureStep: BuiltInPositionTactic = anon { (provable: ProvableSig, pos: Position) =>
+    ProofRuleTactics.requireOneSubgoal(provable, "closureExpandStep")
+    val sequent = provable.subgoals.head
+    sequent.at(pos) match {
+      case (_, fml: Formula) => fml match {
+        case Closure(True) => useAt(Ax.closureTrue)(pos).computeResult(provable)
+        case Closure(Less(_, _)) => useAt(Ax.closureLess)(pos).computeResult(provable)
+        case Closure(LessEqual(_, _)) => useAt(Ax.closureLessEqual)(pos).computeResult(provable)
+        case Closure(Greater(_, _)) => useAt(Ax.closureGreater)(pos).computeResult(provable)
+        case Closure(GreaterEqual(_, _)) => useAt(Ax.closureGreaterEqual)(pos).computeResult(provable)
+        case Closure(Equal(_, _)) => useAt(Ax.closureEqual)(pos).computeResult(provable)
+        case Closure(DifferentialFormula(_)) => useAt(Ax.closureDiff)(pos).computeResult(provable)
+        case Closure(And(_, _)) => useAt(Ax.closureAnd)(pos).computeResult(provable)
+        case Closure(Or(_, _)) => useAt(Ax.closureOr)(pos).computeResult(provable)
+        case Closure(Not(_)) => useAt(Ax.closureNot)(pos).computeResult(provable)
+        case Closure(Imply(_, _)) => useAt(Ax.closureImply)(pos).computeResult(provable)
+        case Closure(Equiv(_, _)) => useAt(Ax.closureEquiv)(pos).computeResult(provable)
+        case Closure(Forall(_, _)) => useAt(Ax.closureForall)(pos).computeResult(provable)
+        case Closure(Exists(_, _)) => useAt(Ax.closureExists)(pos).computeResult(provable)
+        case Closure(Box(_, _)) => useAt(Ax.closureBox)(pos).computeResult(provable)
+        case Closure(Diamond(_, _)) => useAt(Ax.closureDiamond)(pos).computeResult(provable)
+        case Closure(PredOf(_, _)) => throw new TacticInapplicableFailure("unfold predicational first")
+        case e => throw new TacticInapplicableFailure("closureExpand only applicable to cls(.), but got " + e.prettyString)
+      }
+      case (_, e) => throw new TacticInapplicableFailure("closureExpand only applicable to cls(.), but got " + e.prettyString)
+    }
   }
 }

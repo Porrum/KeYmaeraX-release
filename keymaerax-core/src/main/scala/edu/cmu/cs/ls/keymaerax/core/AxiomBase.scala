@@ -503,8 +503,103 @@ End.
 
 /* Differential While Generalization */
 Axiom "DWGen dwhile generalization base"
-  ([{c&cl(q())}]p() -> [dwhile(q()){c}]p()) <-> true
-  /* [x'=f(x)&cl(c)]p -> [dwhile(c){x'=f(x)}](p) THEORY */
+  (([{c&cls(q(||))}]p(||)) -> [dwhile(q(||)){c}]p(||)) <-> true
+  /* [x'=f(x)&cls(c)]p -> [dwhile(c){x'=f(x)}](p) THEORY */
+End.
+
+/** TOPOSEMANTIC CLOSURE AXIOMS */
+/* see function definition */
+
+Axiom "closure <"
+   cls(f() < g()) <-> (f() <= g())
+   /* cls(f < g) <-> (f <= g) THEORY */
+End.
+
+Axiom "closure >"
+   (cls(f() > g())) <-> (f() >= g())
+   /* cls(f > g) <-> (f >= g) THEORY */
+End.
+
+/*Axiom "closure predicational"
+   /* TODO evaluate necessity of this axiom
+   cls(f(q())) <-> (f(cls(q()))
+   /* cls(f(q)) <-> f(cls(q)) THEORY
+End.*/
+
+Axiom "closure not"
+   cls(!q()) <-> !(cls(q()))
+   /* cls(!q) <-> !(cls(q)) THEORY */
+End.
+
+Axiom "closure differential"
+   cls(q()') <-> (cls(q()))'
+   /* cls(q') <-> (cls(q))' THEORY */
+End.
+
+Axiom "closure &"
+   cls(p() & q()) <-> (cls(p()) & cls(q()))
+   /* cls(p & q) <-> (cls(p) & cls(q)) THEORY */
+End.
+
+Axiom "closure |"
+   cls(p() | q()) <-> (cls(p()) | cls(q()))
+   /* cls(p | q) <-> (cls(p) | cls(q)) THEORY */
+End.
+
+Axiom "closure ->"
+   cls(p() -> q()) <-> (cls(p()) -> cls(q()))
+   /* cls(p -> q) <-> (cls(p) -> cls(q)) THEORY */
+End.
+
+Axiom "closure <->"
+   cls(p() <-> q()) <-> (cls(p()) <-> cls(q()))
+   /* cls(p <-> q) <-> (cls(p) <-> cls(q)) THEORY */
+End.
+
+Axiom "closure forall"
+   cls(\forall x_ q()) <-> (\forall x_ cls(q()))
+   /* cls(\forall x q) <-> (\forall x cls(q)) THEORY */
+End.
+
+Axiom "closure exists"
+   cls(\exists x_ q()) <-> (\exists x_ cls(q()))
+   /* cls(\exists x q) <-> (\exists x cls(q)) THEORY */
+End.
+
+Axiom "closure []"
+   cls([a;]q()) <-> ([a;]cls(q()))
+   /* cls([a;]q) <-> ([a;]cls(q)) THEORY */
+End.
+
+Axiom "closure <>"
+   cls(<a;>q()) <-> (<a;>cls(q()))
+   /* cls(<a;>q) <-> (<a;>cls(q)) THEORY */
+End.
+
+/** base cases */
+Axiom "closure true"
+   cls(true) <-> (true)
+   /* cls(true) <-> (true) THEORY */
+End.
+
+Axiom "closure false"
+   cls(false) <-> (false)
+   /* cls(false) <-> (false) THEORY */
+End.
+
+Axiom "closure <="
+   (cls(f() <= g())) <-> (f() <= g())
+   /* cls(f <= g) <-> (f <= g) THEORY */
+End.
+
+Axiom "closure >="
+   (cls(f() >= g())) <-> (f() >= g())
+   /* cls(f >= g) <-> (f >= g) THEORY */
+End.
+
+Axiom "closure ="
+   (cls(f() = g())) <-> (f() = g())
+   /* cls(f = g) <-> (f = g) THEORY */
 End.
 
 /** DIFFERENTIAL AXIOMS */
