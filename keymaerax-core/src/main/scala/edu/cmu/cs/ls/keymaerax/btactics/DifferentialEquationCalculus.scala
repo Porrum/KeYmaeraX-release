@@ -245,6 +245,12 @@ trait DifferentialEquationCalculus {
     displayLevel="all", revealInternalSteps = true, codeName = "dI")
   def   dIX: DependentPositionTactic = DifferentialTactics.diffInd('cex)
 
+  @Tactic(names="dwI", longDisplayName="Dwhile Invariant",
+    premises="cls(Q) |- [x':=f(x)](P)'",
+    conclusion="F |- [dwhile(Q) x'=f(x)]F",
+    displayLevel="browse", revealInternalSteps = true, codeName = "dwI")
+  def dwI: DependentPositionTactic = DifferentialTactics.dwI
+
   /** dG(ghost,r): Differential Ghost add auxiliary differential equations with extra variables
     * ghost of the form y'=a*y+b and the postcondition replaced by r, if provided.
     * {{{

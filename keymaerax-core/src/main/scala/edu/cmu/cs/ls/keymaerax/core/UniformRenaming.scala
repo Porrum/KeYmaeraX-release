@@ -137,6 +137,8 @@ final case class URename(what: Variable, repl: Variable, semantic: Boolean = fal
     case Imply(l, r) => Imply(rename(l), rename(r))
     case Equiv(l, r) => Equiv(rename(l), rename(r))
 
+    case Closure(g)  => Closure(rename(g))
+
     // NOTE DifferentialFormula in analogy to Differential
     case DifferentialFormula(g) => DifferentialFormula(rename(g))
 

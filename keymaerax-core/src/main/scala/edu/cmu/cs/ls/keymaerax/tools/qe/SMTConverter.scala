@@ -109,6 +109,7 @@ abstract class SMTConverter extends (Formula=>String) {
     case Or(l, r)       => "(or "    + convertFormula(l) + " " + convertFormula(r) + ")"
     case Imply(l, r)    => "(=> "    + convertFormula(l) + " " + convertFormula(r) + ")"
     case Equiv(l, r)    => "(equiv " + convertFormula(l) + " " + convertFormula(r) + ")"
+    case Closure(ff)    => "(cls("   + convertFormula(ff) + "))"
     case Equal(l, r)    => "(= "     + convertTerm(l) + " " + convertTerm(r) + ")"
     case NotEqual(l, r) => convertFormula(Not(Equal(l, r)))
     case Greater(l,r)   => "(> "     + convertTerm(l) + " " + convertTerm(r) + ")"

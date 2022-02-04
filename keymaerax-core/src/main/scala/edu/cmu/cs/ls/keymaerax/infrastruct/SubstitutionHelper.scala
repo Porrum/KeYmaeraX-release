@@ -124,6 +124,8 @@ class SubstitutionHelper(replace: Term => Option[Term]) {
     case LessEqual(l, r) => LessEqual(usubst(o, u, l), usubst(o, u, r))
     case Less(l, r) => Less(usubst(o, u, l), usubst(o, u, r))
 
+    case Closure(g) => Closure(usubst(o, u, g))
+
     // binding cases add bound variables to u
     case Forall(vars, g) => Forall(vars, usubst(o ++ vars, u ++ vars, g))
     case Exists(vars, g) => Exists(vars, usubst(o ++ vars, u ++ vars, g))
