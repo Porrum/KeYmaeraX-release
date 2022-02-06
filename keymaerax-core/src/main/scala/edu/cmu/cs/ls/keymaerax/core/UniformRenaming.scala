@@ -158,6 +158,7 @@ final case class URename(what: Variable, repl: Variable, semantic: Boolean = fal
     case AssignAny(x)                => AssignAny(renVar(x))
     case Test(f)                     => Test(rename(f))
     case ODESystem(a, h)             => ODESystem(renameODE(a), rename(h))
+    case Dwhile(cond, ode)           => Dwhile(rename(cond), renameODE(ode))
     //@note This case happens for standalone uniform substitutions on differential programs such as x'=f() or c as they come up in unification for example.
     case ode: DifferentialProgram    => renameODE(ode)
     //@note the following cases are equivalent to f.reapply but are left explicit to enforce revisiting this case when data structure changes.

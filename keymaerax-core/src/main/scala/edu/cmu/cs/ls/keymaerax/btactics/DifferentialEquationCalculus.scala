@@ -304,6 +304,26 @@ trait DifferentialEquationCalculus {
   def dGold(y: Variable, t1: Term, t2: Term, p: Option[Formula]): DependentPositionWithAppliedInputTactic =
     TactixLibrary.dG(AtomicODE(DifferentialSymbol(y), Plus(Times(t1, y), t2)), p)
 
+  @Tactic(longDisplayName = "Dwhile Ghost",
+    // TODO adapt tactics code block
+    premises = "Γ |- ∃y [dwhile(Q)x'=f(x),E]G, Δ ;; G |- P",
+    conclusion = "Γ |- [dwhile(Q)x'=f(x)]P, Δ",
+    contextPremises = "Γ |- C( ∃y [dwhile(Q)x'=f(x),E]G ), Δ",
+    contextConclusion = "Γ |- C( [dwhile(Q)x'=f(x)]P ), Δ",
+    revealInternalSteps = true, inputs = "E[y,x,y']:expression")
+  def dwG(E: Expression): DependentPositionWithAppliedInputTactic = inputanon { (pos:Position) =>
+    E match {
+      case Equal(l: DifferentialSymbol, r) =>
+        DifferentialTactics.dwG(AtomicODE(l, r))(pos)
+      case dp: DifferentialProgram =>
+        DifferentialTactics.dwG(dp)(pos)
+      case ODESystem(dp, _) =>
+        DifferentialTactics.dwG(dp)(pos)
+      case _ =>
+        throw new IllegalArgumentException("Expected a differential program y′=f(y), but got " + E.prettyString)
+    }
+  }
+
 
   // more DI/DC/DG variants
 

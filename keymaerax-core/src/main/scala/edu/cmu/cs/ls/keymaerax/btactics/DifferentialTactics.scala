@@ -705,6 +705,85 @@ private object DifferentialTactics extends Logging {
     }
   })
 
+  /** dwG: Differential While Ghost add auxiliary differential equations with extra variables `y'=a*y+b`.
+   * `[dwhile(q(x))x'=f(x)]p(x)` reduces to `\exists y [dwhile(q(x))x'=f(x),y'=a*y+b]p(x)`.
+   *
+   * @param ghost A differential program of the form y'=a*y+b or y'=a*y or y'=b.
+   */
+  private[btactics] def dwG(ghost: DifferentialProgram): DependentPositionTactic = anon ((pos: Position, sequent: Sequent) => {
+    val (y:Variable, a:Term, b:Term) = try {
+      DifferentialHelper.parseGhost(ghost)
+    } catch {
+      case ex: CoreException =>
+        val wrongShapeStart = ex.getMessage.indexOf("b(|y_|)~>")
+        throw new InputFormatFailure(ex.getMessage.substring(wrongShapeStart + "b(|y_|)~>".length).stripSuffix(")") +
+          " is not of the expected shape a*y+b, please provide a differential program of the shape y'=a*y+b.")
+    }
+
+    sequent.sub(pos) match {
+      case Some(fml@Box(ode@Dwhile(h, _), _)) if !StaticSemantics(ode).bv.contains(y) &&
+        !StaticSemantics.symbols(a).contains(y) && !StaticSemantics.symbols(b).contains(y) &&
+        !StaticSemantics.freeVars(fml).contains(y) =>
+
+        val singular = {
+          val evDomFmls = flattenConjunctions(h)
+          (FormulaTools.singularities(a) ++ FormulaTools.singularities(b)).filter(v =>
+            !evDomFmls.contains(Less(v, Number(0)))     &&
+              !evDomFmls.contains(Less(Number(0), v))     &&
+              !evDomFmls.contains(Greater(v, Number(0)))  &&
+              !evDomFmls.contains(Greater(Number(0), v))  &&
+              !evDomFmls.contains(NotEqual(v, Number(0))) &&
+              !evDomFmls.contains(Greater(Number(0), v))
+          )
+        }
+
+        if (singular.nonEmpty)
+          throw new IllFormedTacticApplicationException("Possible singularities during dwG(" + ghost + ") will be rejected: " +
+            singular.mkString(",") + " in\n" + sequent.prettyString +
+            "\nWhen dividing by a variable v, try cutting v!=0 into the evolution domain constraint"
+          )
+
+        (a, b) match {
+          case (Number(n), _) if n == 0 =>
+            val subst = (us: Option[Subst]) => us.getOrElse(throw new UnsupportedTacticFeature("dwG expects substitution result from unification")) ++ RenUSubst(
+              (Variable("y_",None,Real), y) ::
+                (UnitFunctional("b", Except(Variable("y_", None, Real)::Nil), Real), b) :: Nil)
+            useAt(Ax.DWGC, PosInExpr(0::Nil), subst)(pos)
+          case (_, Neg(Number(n))) =>
+            val subst = (us: Option[Subst]) => us.getOrElse(throw new UnsupportedTacticFeature("dwG expects substitution result from unification")) ++ RenUSubst(
+              (Variable("y_",None,Real), y) ::
+                (UnitFunctional("a", Except(Variable("y_", None, Real)::Nil), Real), a) ::
+                (UnitFunctional("b", Except(Variable("y_", None, Real)::Nil), Real), Number(-n)) :: Nil)
+            useAt(Ax.DWG, PosInExpr(0::Nil), subst)(pos)
+          case _ =>
+            val subst = (us: Option[Subst]) => us.getOrElse(throw new UnsupportedTacticFeature("dwG expects substitution result from unification")) ++ RenUSubst(
+              (Variable("y_",None,Real), y) ::
+                (UnitFunctional("a", Except(Variable("y_", None, Real)::Nil), Real), a) ::
+                (UnitFunctional("b", Except(Variable("y_", None, Real)::Nil), Real), b) :: Nil)
+            useAt(Ax.DWG, PosInExpr(0::Nil), subst)(pos)
+        }
+
+      case Some(Box(ode: ODESystem, _)) if StaticSemantics(ode).bv.contains(y) =>
+        throw new InputFormatFailure(
+          "Differential ghost " + y + " of " + ghost + " is not new but already has a differential equation in " + ode + ".\nChoose a new name for the differential ghost.")
+
+      case Some(Box(_: ODESystem, _)) if StaticSemantics.symbols(a).contains(y) || StaticSemantics.symbols(b).contains(y) =>
+        throw new InputFormatFailure(
+          "Differential ghost " + y + " occurs nonlinearly or in the wrong place of the new differential equation " + ghost + ".\nChoose a differential equation " + y + "'=a*" + y + "+b that is linear in the differential ghost.")
+
+      case Some(Box(ode: ODESystem, _)) if StaticSemantics(ode).fv.contains(y) =>
+        throw new InputFormatFailure(
+          "Differential ghost " + y + " of " + ghost + " is not new but already read in the differential equation " + ode + ".\nChoose a new name for the differential ghost.")
+
+      case Some(Box(_: ODESystem, p)) if StaticSemantics(p).fv.contains(y) =>
+        throw new InputFormatFailure(
+          "Differential ghost " + y + " of " + ghost + " is not new but already read in the postcondition " + p + ".\nChoose a new name for the differential ghost.")
+
+      case Some(e) => throw new TacticInapplicableFailure("dwG only applicable to box dwhile, but got " + e.prettyString)
+      case None => throw new IllFormedTacticApplicationException("Position " + pos + " does not point to a valid position in sequent " + sequent.prettyString)
+    }
+  })
+
   /** @see [[HilbertCalculus.Derive.Dvar]] */
   //@todo could probably simplify implementation by picking atomic formula, using "x' derive var" and then embedding this equivalence into context by CE.
   //@todo Or, rather, by using CE directly on a "x' derive var" provable fact (z)'=1 <-> z'=1.
