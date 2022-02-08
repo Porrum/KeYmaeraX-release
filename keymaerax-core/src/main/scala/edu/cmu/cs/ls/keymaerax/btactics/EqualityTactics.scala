@@ -648,9 +648,9 @@ private object EqualityTactics {
     tactics.foldLeft(provable)({ (pr, r) => pr(r, 0) })
   }
 
-  @Tactic(codeName = "closureExpandStep", longDisplayName = "Expand Closure Step")
-  val expandClosureStep: BuiltInPositionTactic = anon { (provable: ProvableSig, pos: Position) =>
-    ProofRuleTactics.requireOneSubgoal(provable, "closureExpandStep")
+  @Tactic(codeName = "unfoldClosureStep", longDisplayName = "Unfold Closure Step")
+  val unfoldClosureStep: BuiltInPositionTactic = anon { (provable: ProvableSig, pos: Position) =>
+    ProofRuleTactics.requireOneSubgoal(provable, "unfoldClosureStep")
     val sequent = provable.subgoals.head
     sequent.at(pos) match {
       case (_, fml: Formula) => fml match {
@@ -670,10 +670,10 @@ private object EqualityTactics {
         case Closure(Exists(_, _)) => useAt(Ax.closureExists)(pos).computeResult(provable)
         case Closure(Box(_, _)) => useAt(Ax.closureBox)(pos).computeResult(provable)
         case Closure(Diamond(_, _)) => useAt(Ax.closureDiamond)(pos).computeResult(provable)
-        case Closure(PredOf(_, _)) => throw new TacticInapplicableFailure("unfold predicational first")
-        case e => throw new TacticInapplicableFailure("closureExpand only applicable to cls(.), but got " + e.prettyString)
+        case Closure(PredOf(_, _)) => throw new TacticInapplicableFailure("unfold predicate first")
+        case e => throw new TacticInapplicableFailure("unfoldClosure only applicable to cls(.), but got " + e.prettyString)
       }
-      case (_, e) => throw new TacticInapplicableFailure("closureExpand only applicable to cls(.), but got " + e.prettyString)
+      case (_, e) => throw new TacticInapplicableFailure("unfoldClosure only applicable to cls(.), but got " + e.prettyString)
     }
   }
 }

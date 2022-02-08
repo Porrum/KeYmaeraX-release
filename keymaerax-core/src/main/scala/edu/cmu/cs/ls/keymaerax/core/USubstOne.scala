@@ -361,6 +361,7 @@ final case class USubstOne(subsDefsInput: immutable.Seq[SubstitutionPair]) exten
       case AssignAny(x)                => SetLattice(x)
       //@note system generalization of x'=e&h
       case ODESystem(a, h)             => substBoundVars(a)
+      case Dwhile(_, ode)              => substBoundVars(ode)
       case DifferentialProduct(a, b)   => substBoundVars(a) ++ substBoundVars(b)
     }
   }

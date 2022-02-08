@@ -990,29 +990,11 @@ private object DifferentialTactics extends Logging {
       case Some(Box(a: Dwhile, q)) =>
         require(pos.isTopLevel && pos.isSucc, "dwW only at top level in succedent")
 
-        val primedVars = DifferentialHelper.getPrimedVariables(a.ode).toSet
-        val constFacts = sequent.zipWithPositions.flatMap({
-          case (fml, pos) =>
-            if (pos.isAnte) FormulaTools.conjuncts(fml)
-            else FormulaTools.conjuncts(fml).map(Not)
-        }).filter(f => StaticSemantics.freeVars(f).intersect(primedVars).isEmpty).reduceRightOption(And)
-
-        val p = constFacts match {
-          case Some(f) => And(Not(a.condition), f)
-          case None => Not(a.condition)
-        }
-
-        constFacts.map(DifferentialEquationCalculus.dC(_)(pos) &
-          // diffCut may not introduce the cut if it is already in there; diffCut changes the position in the show branch to 'Rlast
-          Idioms.doIf(_.subgoals.size == 2)(<(skip, V('Rlast) & prop & done))).getOrElse(skip) & DWW(pos) & G(pos) & implyR('R, Imply(p, q))
+        DWW(pos) & G(pos) & implyR('R)
       case Some(e) => throw new TacticInapplicableFailure("dwW only applicable to box ODEs, but got " + e.prettyString)
       case None => throw new IllFormedTacticApplicationException("Position " + pos + " does not point to a valid position in sequent " + sequent.prettyString)
     }
   )
-
-  //A user-friendly error message displayed when ODE can't find anything useful to do.
-  private val failureMessage = "ODE automation was neither able to prove the postcondition invariant nor automatically find new ODE invariants."+
-    " Try annotating the ODE with additional invariants or refining the evolution domain with a differential cut."
 
   /** [[DifferentialEquationCalculus.dwGen]]. dwhileGeneralization */
   @Tactic(names="dwGen",
@@ -1030,6 +1012,10 @@ private object DifferentialTactics extends Logging {
       case None => throw new IllFormedTacticApplicationException("Position " + pos + " does not point to a valid position in sequent " + seq.prettyString)
     }
   }
+
+  //A user-friendly error message displayed when ODE can't find anything useful to do.
+  private val failureMessage = "ODE automation was neither able to prove the postcondition invariant nor automatically find new ODE invariants."+
+    " Try annotating the ODE with additional invariants or refining the evolution domain with a differential cut."
 
   /** Assert LZZ succeeds at a certain position. */
   lazy val lzzCheck: BuiltInPositionTactic = {

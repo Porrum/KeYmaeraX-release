@@ -150,6 +150,10 @@ class SubstitutionHelper(replace: Term => Option[Term]) {
       val sode = usubst(o, u, x, ode)
       val ssys = ODESystem(sode, usubst(o++SetLattice(x), u++SetLattice(x), h))
       USR(o++SetLattice(x), u++SetLattice(x), ssys)
+    case Dwhile(cond, ode) => val x = primedVariables(ode)
+      val sode = usubst(o, u, x, ode)
+      val sdwhile = Dwhile(usubst(o++SetLattice(x), u++SetLattice(x), cond), sode)
+      USR(o++SetLattice(x), u++SetLattice(x), sdwhile)
     case ode: DifferentialProgram => val x = primedVariables(ode); val sode = usubst(o, u, x, ode); USR(o++SetLattice(x), u++SetLattice(x), sode)
     case Compose(a, b) => val USR(q, v, as) = usubst(o, u, a); val USR(r, w, bs) = usubst(q, v, b); USR(r, w, Compose(as, bs))
     case Choice(a, b) =>

@@ -304,7 +304,7 @@ trait DifferentialEquationCalculus {
   def dGold(y: Variable, t1: Term, t2: Term, p: Option[Formula]): DependentPositionWithAppliedInputTactic =
     TactixLibrary.dG(AtomicODE(DifferentialSymbol(y), Plus(Times(t1, y), t2)), p)
 
-  @Tactic(longDisplayName = "Dwhile Ghost",
+  @Tactic("dwG", longDisplayName = "Dwhile Ghost",
     // TODO adapt tactics code block
     premises = "Γ |- ∃y [dwhile(Q)x'=f(x),E]G, Δ ;; G |- P",
     conclusion = "Γ |- [dwhile(Q)x'=f(x)]P, Δ",
