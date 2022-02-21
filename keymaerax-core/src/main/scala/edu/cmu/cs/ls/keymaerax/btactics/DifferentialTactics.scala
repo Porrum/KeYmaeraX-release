@@ -289,7 +289,7 @@ private object DifferentialTactics extends Logging {
 
   /** @see [[DifferentialEquationCalculus.dwI]] */
   val dwI: DependentPositionTactic = anon { (pos: Position, _: Sequent) =>
-    dwGeneralization(pos) & DIRule(pos) <(id, skip)
+    dwGeneralization(pos) & diffIndRule(pos) <(id, skip)
   }
 
   /** @see [[TactixLibrary.dCC()]] */

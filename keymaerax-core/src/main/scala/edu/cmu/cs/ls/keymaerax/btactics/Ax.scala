@@ -511,6 +511,8 @@ object Ax extends Logging {
     val closureGreaterEqual: CoreAxiomInfo = coreAxiom("closure >=")
   @Axiom("closure =", conclusion = "cls(f = g) ↔ (f = g)", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
     val closureEqual: CoreAxiomInfo = coreAxiom("closure =")
+  @Axiom("closure !=", conclusion = "cls(f != g) ↔ (f != g)", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
+  val closureNotEqual: CoreAxiomInfo = coreAxiom("closure !=")
   @Axiom("closure true", conclusion = "cls(true) ↔ true", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")
     val closureTrue: CoreAxiomInfo = coreAxiom("closure true")
   @Axiom("closure false", conclusion = "cls(false) ↔ false", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")

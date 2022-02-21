@@ -660,6 +660,7 @@ private object EqualityTactics {
         case Closure(Greater(_, _)) => useAt(Ax.closureGreater)(pos).computeResult(provable)
         case Closure(GreaterEqual(_, _)) => useAt(Ax.closureGreaterEqual)(pos).computeResult(provable)
         case Closure(Equal(_, _)) => useAt(Ax.closureEqual)(pos).computeResult(provable)
+        case Closure(NotEqual(_, _)) => useAt(Ax.closureNotEqual)(pos).computeResult(provable)
         case Closure(DifferentialFormula(_)) => useAt(Ax.closureDiff)(pos).computeResult(provable)
         case Closure(And(_, _)) => useAt(Ax.closureAnd)(pos).computeResult(provable)
         case Closure(Or(_, _)) => useAt(Ax.closureOr)(pos).computeResult(provable)
@@ -675,5 +676,21 @@ private object EqualityTactics {
       }
       case (_, e) => throw new TacticInapplicableFailure("unfoldClosure only applicable to cls(.), but got " + e.prettyString)
     }
+  }
+
+  @Tactic(codeName = "unfoldClosure", longDisplayName = "Unfold Closure")
+  val unfoldClosure: BuiltInTactic = anon { (provable: ProvableSig) =>
+    ProofRuleTactics.requireOneSubgoal(provable, "unfoldClosure")
+    val s = provable.subgoals.head
+    val allTopPos = s.ante.indices.map(AntePos) ++ s.succ.indices.map(SuccPos)
+    val tactics = allTopPos.flatMap(p =>
+      Idioms.mapSubpositions(p, s, {
+        case (Closure(_), pos: Position) => Some(?(protectPos(unfoldClosureStep)(pos).computeResult _)(_))
+        case _ => None
+      })
+    )
+
+    tactics.foldLeft(provable){ (pr, r) => pr(r, 0) }
+      //(Idioms.doIfFw(_.subgoals.exists(provable.subgoals.exists(s: Sequent => s.prettyString().contains("cls"))))(unfoldClosureAt.result).result _, 0)
   }
 }

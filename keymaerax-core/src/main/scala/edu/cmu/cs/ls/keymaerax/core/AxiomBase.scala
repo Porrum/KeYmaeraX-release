@@ -608,6 +608,11 @@ Axiom "closure ="
    /* cls(f = g) <-> (f = g) THEORY */
 End.
 
+Axiom "closure !="
+   (cls(f() != g())) <-> (f() != g())
+   /* cls(f != g) <-> (f != g) THEORY */
+End.
+
 /** DIFFERENTIAL AXIOMS */
 
 Axiom "c()' derive constant fn"
