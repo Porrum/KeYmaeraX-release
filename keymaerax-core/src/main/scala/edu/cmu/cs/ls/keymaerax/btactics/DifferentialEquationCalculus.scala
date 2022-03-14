@@ -246,7 +246,7 @@ trait DifferentialEquationCalculus {
   def   dIX: DependentPositionTactic = DifferentialTactics.diffInd('cex)
 
   @Tactic(names="dwI", longDisplayName="Dwhile Invariant",
-    premises="cls(Q) |- [x':=f(x)](P)'",
+    premises="cls(Q) |- [x':=f(x)](F)'",
     conclusion="F |- [dwhile(Q) x'=f(x)]F",
     displayLevel="browse", revealInternalSteps = true, codeName = "dwI")
   def dwI: DependentPositionTactic = DifferentialTactics.dwI

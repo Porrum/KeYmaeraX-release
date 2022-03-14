@@ -4,7 +4,7 @@
   */
 package edu.cmu.cs.ls.keymaerax.parser
 
-import edu.cmu.cs.ls.keymaerax.core.{Function, Real, Bool, Tuple}
+import edu.cmu.cs.ls.keymaerax.core.{Function, Real, Tuple}
 
 /** Lists interpreted function symbols. */
 object InterpretedSymbols {

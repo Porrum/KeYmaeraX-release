@@ -389,6 +389,8 @@ class DLParser extends Parser {
     map({case (f, p) => Compose(Loop(Compose(Test(f), p)), Test(Not(f)))})
   def dwhile[_: P]: P[Program] = P( "dwhile" ~/ parenF ~ "{" ~ ode ~ "}" ).
     map({case (f, o) => Dwhile(f, o)})
+  def dwhileannotated[_: P]: P[Program] = P( "{" ~ dwhile ~ "}" ~/ annotation.?).
+    map({case (p, None) => p case (p, Some(inv)) => reportAnnotation(p, inv); p})
 
   //@note macro-expands
   def ifthen[_: P]: P[Program] = P( "if" ~/ parenF ~ braceP ~ ("else" ~/ braceP).? ).

@@ -340,6 +340,7 @@ class KeYmaeraXParser(val LAX_MODE: Boolean) extends Parser with TokenParser wit
   private def isAnnotable(p: Program): Boolean = p match {
     case _: Loop => true
     case _: ODESystem => true
+    case _: Dwhile => true
     case Compose(_, r) => isAnnotable(r)
     case Choice(_, r) => isAnnotable(r)
     case p => p.kind == DifferentialProgramKind
@@ -945,7 +946,7 @@ class KeYmaeraXParser(val LAX_MODE: Boolean) extends Parser with TokenParser wit
 
       case _ :+ (tok@Token(DWHILE,_)) :+ Token(LPAREN,_) :+ Expr(t1, _) =>
         if (followsExpression(t1, la, lax) && la!=EOF) shift(st)
-        else if (la==EOF) throw ParseException.imbalancedError("Unmatched while", tok, st)
+        else if (la==EOF) throw ParseException.imbalancedError("Unmatched differential while", tok, st)
         else if (elaboratable(FormulaKind, t1, lax).isDefined && followsFormula(la)) shift(st)
         else error(st, List(FOLLOWSEXPRESSION))
 
@@ -1107,8 +1108,6 @@ class KeYmaeraXParser(val LAX_MODE: Boolean) extends Parser with TokenParser wit
         else throw ParseException("Interpreted symbol " + name.name + ": expected domain " + d + " but got " + arg.sort, st.location, arg.sort.toString, d.toString)
       case Some((Bool, d)) =>
         if (arg.sort == d) reduce(st, consuming, PredOf(func(name.name, name.index, arg.sort, Bool), arg), loc, remainder)
-        //TODO try to lift type of arg to bool if closure
-        //else if (name.name == "cl") reduce(st, consuming, PredOf(func(name.name, name.index, Bool, Bool), arg), loc, remainder)
         else throw ParseException("Interpreted symbol " + name.name + ": expected domain " + d + " but got " + arg.sort, st.location, arg.sort.toString, d.toString)
       case Some((s, _)) => throw ParseException("Unknown sort " + s, st)
       case None =>

@@ -972,7 +972,7 @@ private object DifferentialTactics extends Logging {
     case None => throw new IllFormedTacticApplicationException("Position " + pos + " does not point to a valid position in sequent " + sequent.prettyString)
   })
 
-  /** [[DifferentialEquationCalculus.dwW]]. dwhileWeaken by diffCut(consts) <(diffWeakenG, V&close) */
+  /** [[DifferentialEquationCalculus.dwW]]. dwhileWeaken by DWW & G & implyR */
   @Tactic(names="dwW",
     codeName="dwW",
     longDisplayName="Dwhile Weaken",
@@ -991,7 +991,7 @@ private object DifferentialTactics extends Logging {
         require(pos.isTopLevel && pos.isSucc, "dwW only at top level in succedent")
 
         DWW(pos) & G(pos) & implyR('R)
-      case Some(e) => throw new TacticInapplicableFailure("dwW only applicable to box ODEs, but got " + e.prettyString)
+      case Some(e) => throw new TacticInapplicableFailure("dwW only applicable to box differential while loops, but got " + e.prettyString)
       case None => throw new IllFormedTacticApplicationException("Position " + pos + " does not point to a valid position in sequent " + sequent.prettyString)
     }
   )

@@ -252,7 +252,7 @@ final case class USubstOne(subsDefsInput: immutable.Seq[SubstitutionPair]) exten
       }
 
       //toposemantic closure
-      case Closure(g) =>Closure(usubst(u, g))
+      case Closure(g) => Closure(usubst(u, g))
     }
   }
 
