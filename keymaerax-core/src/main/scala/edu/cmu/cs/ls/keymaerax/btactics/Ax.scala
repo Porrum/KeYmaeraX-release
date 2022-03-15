@@ -473,9 +473,12 @@ object Ax extends Logging {
   @Axiom("DWW", conclusion = "__[dwhile(c){x'=f(x)}]p ↔ [dwhile(c){x'=f(x)}](!c -> p)", displayLevel = "browse",
     key = "0", recursor = "0;*", unifier = "surjlinear")
   val DWW: CoreAxiomInfo = coreAxiom("DWWbase dwhile weakening base")
-  @Axiom("DWGen", conclusion = "(__[x'=f(x)&cl(c)]p -> [dwhile(c){x'=f(x)}](p)) ↔ true", displayLevel = "browse",
+  @Axiom("DWGen", conclusion = "(__([x'=f(x)&cl(c)]p -> [dwhile(c){x'=f(x)}](p)) ↔ true", displayLevel = "browse",
     key = "0", recursor = "0;*", unifier = "surjlinear")
   val DWGen: CoreAxiomInfo = coreAxiom("DWGen dwhile generalization base")
+  @Axiom("DWIfly", conclusion = "(__(r -> [dwhile(c){x'=f(x)}](p & r)) -> [dwhile(c){x'=f(x)}](p)) ↔ true", displayLevel = "internal",
+    key = "0", recursor = "0;*", unifier = "surjlinear")
+  val DWIfly: CoreAxiomInfo = coreAxiom("DWIfly dwhile invariant on-the-fly base")
 
   /* TOPOSEMANTIC CLOSURE */
   @Axiom("closure <", conclusion = "cls(f < g) ↔ (f <= g)", displayLevel = "internal", key = "0", recursor = "0;*", unifier = "surjlinear")

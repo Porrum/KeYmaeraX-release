@@ -251,6 +251,15 @@ trait DifferentialEquationCalculus {
     displayLevel="browse", revealInternalSteps = true, codeName = "dwI")
   def dwI: DependentPositionTactic = DifferentialTactics.dwI
 
+  @Tactic(names="dwIfly", longDisplayName="Dwhile Invariant on-the-fly",
+    premises="Γ, cls(J) |- [x':=f(x)](J)', Δ ;; Γ, J |- [dwhile(Q) x'=f(x)]P, Δ",
+    conclusion="Γ |- [dwhile(Q) x'=f(x)]P, Δ",
+    inputs="J:formula",
+    displayLevel="browse", revealInternalSteps = true, codeName = "dwIfly")
+  def dwIfly(J: Formula): DependentPositionWithAppliedInputTactic = inputanon { (pos: Position) =>
+    DifferentialTactics.dwIfly(J)(pos)
+  }
+
   /** dG(ghost,r): Differential Ghost add auxiliary differential equations with extra variables
     * ghost of the form y'=a*y+b and the postcondition replaced by r, if provided.
     * {{{

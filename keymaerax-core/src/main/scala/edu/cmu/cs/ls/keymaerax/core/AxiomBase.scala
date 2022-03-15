@@ -479,6 +479,12 @@ Axiom "DWGen dwhile generalization base"
   /* [x'=f(x)&cls(c)]p -> [dwhile(c){x'=f(x)}](p) THEORY */
 End.
 
+/* Differential While Invariant On-The-Fly */
+Axiom "DWIfly dwhile invariant on-the-fly base"
+  ((r(||)->[dwhile(q(||)){c}](r(||) & p(||))) -> [dwhile(q(||)){c}]p(||)) <-> true
+  /* (r -> [dwhile(c){x'=f(x)}](p & r)) -> [dwhile(c){x'=f(x)}](p) THEORY */
+End.
+
 /** TOPOSEMANTIC CLOSURE AXIOMS */
 /* see function definition */
 

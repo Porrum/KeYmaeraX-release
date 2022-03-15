@@ -21,7 +21,7 @@ import edu.cmu.cs.ls.keymaerax.tools._
 import edu.cmu.cs.ls.keymaerax.btactics.macros.DerivationInfoAugmentors._
 import edu.cmu.cs.ls.keymaerax.btactics.macros.{AxiomInfo, Tactic}
 import edu.cmu.cs.ls.keymaerax.infrastruct.ExpressionTraversal.ExpressionTraversalFunction
-import edu.cmu.cs.ls.keymaerax.parser.{Declaration, Name, TacticReservedSymbols}
+import edu.cmu.cs.ls.keymaerax.parser.{Declaration, Name, Signature, TacticReservedSymbols}
 import edu.cmu.cs.ls.keymaerax.parser.InterpretedSymbols._
 import edu.cmu.cs.ls.keymaerax.tools.qe.BigDecimalQETool
 
@@ -290,6 +290,21 @@ private object DifferentialTactics extends Logging {
   /** @see [[DifferentialEquationCalculus.dwI]] */
   val dwI: DependentPositionTactic = anon { (pos: Position, _: Sequent) =>
     dwGeneralization(pos) & diffIndRule(pos) <(id, skip)
+  }
+
+  /** @see [[DifferentialEquationCalculus.dwIfly()]] */
+  def dwIfly(invariant: Formula): DependentPositionTactic = anon { (pos: Position, seq: Sequent, defs: Declaration) =>
+    val invOldsDefs = Declaration(defs.decls.filter({ case (_, Signature(_, _, _, i, _)) =>
+      i.map(s => StaticSemantics.symbols(defs.exhaustiveSubst(s))).getOrElse(Set.empty).contains(TacticReservedSymbols.old) }))
+    val substInv = invOldsDefs.exhaustiveSubst(invariant)
+
+    pos.checkTop
+    seq.sub(pos) match {
+      case Some(Box(Dwhile(cond, ode), post)) =>
+        cutR(Imply(substInv, Box(Dwhile(cond, ode), And(substInv, post))))(pos) <(implyR(pos) & boxAnd(pos) & andR(pos) <(dwI(pos), skip),useAt(Ax.DWIfly)(pos) & closeT)
+      case Some(e) => throw new TacticInapplicableFailure("dwI on-the-fly only applicable to box differential while loops, but got " + e.prettyString)
+      case None => throw new IllFormedTacticApplicationException("Position " + pos + " does not point to a valid position in sequent " + seq.prettyString)
+    }
   }
 
   /** @see [[TactixLibrary.dCC()]] */
