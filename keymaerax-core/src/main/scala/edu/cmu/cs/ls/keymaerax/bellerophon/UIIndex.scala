@@ -130,6 +130,7 @@ object UIIndex {
               else ("solve" :: "dC" :: "dIRule" :: "dW" :: "dG" :: Nil) ++ (maybeSplit :+ "GV" :+ "MR")
             }
             else ("solve" :: "dC" :: Nil) ++ (maybeSplit :+ "GV" :+ "MR")
+          case Dwhile(_, _) if pos.forall(_.isSucc) & pos.forall(_.isTopLevel) => "dwW" :: "dwG" :: "dwGen" :: "dwI" ::  "dwIfly" :: Nil
           case ProgramConst(name, _) if substs.exists({ case SubstitutionPair(ProgramConst(wn, _), _) => wn == name case _ => false }) =>
             s"""expand "$name"""" :: rules
           case SystemConst(name, _) if substs.exists({ case SubstitutionPair(SystemConst(wn, _), _) => wn == name case _ => false }) =>
@@ -190,6 +191,8 @@ object UIIndex {
           case _: Equiv => "!<-> deMorgan" :: alwaysApplicableAtNot
           case _ => alwaysApplicableAtNot
         }
+
+      case Closure(_) => "unfoldClosure" :: Nil
 
       case _ =>
         // Check for axioms vs. rules separately because sometimes we might want to apply these axioms when we don't

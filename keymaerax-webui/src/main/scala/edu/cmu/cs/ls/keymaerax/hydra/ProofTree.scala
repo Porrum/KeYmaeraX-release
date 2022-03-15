@@ -9,7 +9,7 @@ import edu.cmu.cs.ls.keymaerax.bellerophon._
 import edu.cmu.cs.ls.keymaerax.bellerophon.parser.BelleParser
 import edu.cmu.cs.ls.keymaerax.btactics._
 import edu.cmu.cs.ls.keymaerax.infrastruct.Augmentors._
-import edu.cmu.cs.ls.keymaerax.core.{Box, Expression, FuncOf, Loop, ODESystem, PredOf, Sequent, StaticSemantics, SubstitutionClashException, SubstitutionPair, USubst, Variable}
+import edu.cmu.cs.ls.keymaerax.core.{Box, Dwhile, Expression, FuncOf, Loop, ODESystem, PredOf, Sequent, StaticSemantics, SubstitutionClashException, SubstitutionPair, USubst, Variable}
 import edu.cmu.cs.ls.keymaerax.infrastruct.{Position, RenUSubst, RestrictedBiDiUnificationMatch}
 import edu.cmu.cs.ls.keymaerax.parser.Location
 import edu.cmu.cs.ls.keymaerax.btactics.macros._
@@ -433,6 +433,10 @@ abstract class DbProofTreeNode(db: DBAbstraction, val proof: ProofTree) extends 
           if (invariant.hasNext) Map(FormulaArg("J") -> invariant.next._1)
           else Map.empty
         case Box(_: ODESystem, p) => Map(FormulaArg("P", List("y")) -> p) //@hack for dG
+        case Box(_: Dwhile, _) =>
+          val invariant = generator(goal, pos).iterator
+          if (invariant.hasNext) Map(FormulaArg("J") -> invariant.next._1)
+          else Map.empty
         case _ => Map.empty
       }
     case Some((_, None)) => Map.empty
