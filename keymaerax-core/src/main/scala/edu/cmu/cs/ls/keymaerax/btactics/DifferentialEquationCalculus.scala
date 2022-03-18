@@ -252,7 +252,7 @@ trait DifferentialEquationCalculus {
   def dwI: DependentPositionTactic = DifferentialTactics.dwI
 
   @Tactic(names="dwIfly", longDisplayName="Dwhile Invariant on-the-fly",
-    premises="Γ, cls(J) |- [x':=f(x)](J)', Δ ;; Γ, J |- [dwhile(Q) x'=f(x)]P, Δ",
+    premises="cls(J) |- [x':=f(x)](J)', Δ ;; Γ |- [dwhile(Q) x'=f(x)]P, Δ",
     conclusion="Γ |- [dwhile(Q) x'=f(x)]P, Δ",
     inputs="J:formula",
     displayLevel="browse", revealInternalSteps = true, codeName = "dwIfly")
