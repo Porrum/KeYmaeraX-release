@@ -301,7 +301,7 @@ private object DifferentialTactics extends Logging {
     pos.checkTop
     seq.sub(pos) match {
       case Some(Box(Dwhile(cond, ode), post)) =>
-        cutR(Imply(substInv, Box(Dwhile(cond, ode), And(substInv, post))))(pos) <(implyR(pos) & boxAnd(pos) & andR(pos) <(dwI(pos), skip),useAt(Ax.DWIfly)(pos) & closeT)
+        cutR(Imply(substInv, Box(Dwhile(cond, ode), And(substInv, post))))(pos) <(implyR(pos) & boxAnd(pos) & andR(pos) <(dwI(pos), hideL('L, substInv)),useAt(Ax.DWIfly)(pos) & closeT)
       case Some(e) => throw new TacticInapplicableFailure("dwI on-the-fly only applicable to box differential while loops, but got " + e.prettyString)
       case None => throw new IllFormedTacticApplicationException("Position " + pos + " does not point to a valid position in sequent " + seq.prettyString)
     }
