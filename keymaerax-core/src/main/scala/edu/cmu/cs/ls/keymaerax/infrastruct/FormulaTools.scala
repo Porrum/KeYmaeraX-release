@@ -319,6 +319,7 @@ object FormulaTools extends Logging {
     case AssignAny(x)      => Set.empty
     case Test(f)           => singularities(f)
     case ODESystem(ode, h) => singularities(ode) ++ singularities(h)
+    case Dwhile(cond, ode) => singularities(cond) ++ singularities(ode)
     // homomorphic cases
     case f:UnaryCompositeProgram  => singularities(f.child)
     case f:BinaryCompositeProgram => singularities(f.left) ++ singularities(f.right)

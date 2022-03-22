@@ -648,13 +648,14 @@ private object EqualityTactics {
     tactics.foldLeft(provable)({ (pr, r) => pr(r, 0) })
   }
 
-  @Tactic(codeName = "unfoldClosureStep", longDisplayName = "Unfold Closure Step")
+  @Tactic(codeName = "unfoldClosureStep", longDisplayName = "Unfold Closure Step", displayLevel = "internal")
   val unfoldClosureStep: BuiltInPositionTactic = anon { (provable: ProvableSig, pos: Position) =>
     ProofRuleTactics.requireOneSubgoal(provable, "unfoldClosureStep")
     val sequent = provable.subgoals.head
     sequent.at(pos) match {
       case (_, fml: Formula) => fml match {
         case Closure(True) => useAt(Ax.closureTrue)(pos).computeResult(provable)
+        case Closure(False) => useAt(Ax.closureFalse)(pos).computeResult(provable)
         case Closure(Less(_, _)) => useAt(Ax.closureLess)(pos).computeResult(provable)
         case Closure(LessEqual(_, _)) => useAt(Ax.closureLessEqual)(pos).computeResult(provable)
         case Closure(Greater(_, _)) => useAt(Ax.closureGreater)(pos).computeResult(provable)
@@ -664,7 +665,27 @@ private object EqualityTactics {
         case Closure(DifferentialFormula(_)) => useAt(Ax.closureDiff)(pos).computeResult(provable)
         case Closure(And(_, _)) => useAt(Ax.closureAnd)(pos).computeResult(provable)
         case Closure(Or(_, _)) => useAt(Ax.closureOr)(pos).computeResult(provable)
-        case Closure(Not(_)) => useAt(Ax.closureNot)(pos).computeResult(provable)
+        case Closure(Not(f)) =>
+          val negationPos = pos ++ PosInExpr.parse(".0")
+          f match {
+            case Less(_, _) => useAt(Ax.notLess)(negationPos).computeResult(provable)
+            case LessEqual(_, _) => useAt(Ax.notLessEqual)(negationPos).computeResult(provable)
+            case Greater(_, _) => useAt(Ax.notGreater)(negationPos).computeResult(provable)
+            case GreaterEqual(_, _) => useAt(Ax.notGreaterEqual)(negationPos).computeResult(provable)
+            case Equal(_, _) => useAt(Ax.notEqual)(negationPos).computeResult(provable)
+            case NotEqual(_, _) => useAt(Ax.notNotEqual)(negationPos).computeResult(provable)
+            case And(_, _) => useAt(Ax.notAnd)(negationPos).computeResult(provable)
+            case Or(_, _) => useAt(Ax.notOr)(negationPos).computeResult(provable)
+            case Not(_) => useAt(Ax.doubleNegation)(negationPos).computeResult(provable)
+            case Imply(_, _) => useAt(Ax.notImply)(negationPos).computeResult(provable)
+            case Equiv(_, _) => useAt(Ax.notEquiv)(negationPos).computeResult(provable)
+            case Forall(_, _) => useAt(Ax.notAll)(negationPos).computeResult(provable)
+            case Exists(_, _) => useAt(Ax.notExists)(negationPos).computeResult(provable)
+            case Box(_, _) => useAt(Ax.notBox)(negationPos).computeResult(provable)
+            case Diamond(_, _) => useAt(Ax.notDiamond)(negationPos).computeResult(provable)
+            case DifferentialFormula(_) => throw new TacticInapplicableFailure("derive first")
+            case PredOf(_, _) => throw new TacticInapplicableFailure("unfold predicate first")
+          }
         case Closure(Imply(_, _)) => useAt(Ax.closureImply)(pos).computeResult(provable)
         case Closure(Equiv(_, _)) => useAt(Ax.closureEquiv)(pos).computeResult(provable)
         case Closure(Forall(_, _)) => useAt(Ax.closureForall)(pos).computeResult(provable)
@@ -678,7 +699,7 @@ private object EqualityTactics {
     }
   }
 
-  @Tactic(codeName = "unfoldClosure", longDisplayName = "Unfold Closure")
+  @Tactic(codeName = "unfoldClosure", longDisplayName = "Unfold Closure", revealInternalSteps = true)
   val unfoldClosure: BuiltInTactic = anon { (provable: ProvableSig) =>
     ProofRuleTactics.requireOneSubgoal(provable, "unfoldClosure")
     val s = provable.subgoals.head
@@ -691,6 +712,5 @@ private object EqualityTactics {
     )
 
     tactics.foldLeft(provable){ (pr, r) => pr(r, 0) }
-      //(Idioms.doIfFw(_.subgoals.exists(provable.subgoals.exists(s: Sequent => s.prettyString().contains("cls"))))(unfoldClosureAt.result).result _, 0)
   }
 }
