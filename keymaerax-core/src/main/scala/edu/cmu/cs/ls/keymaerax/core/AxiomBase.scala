@@ -498,17 +498,6 @@ Axiom "closure >"
    /* cls(f > g) <-> (f >= g) THEORY */
 End.
 
-/*Axiom "closure predicational"
-   /* TODO evaluate necessity of this axiom
-   cls(f(q())) <-> (f(cls(q()))
-   /* cls(f(q)) <-> f(cls(q)) THEORY
-End.*/
-
-Axiom "closure not"
-   cls(!q()) <-> !(cls(q()))
-   /* cls(!q) <-> !(cls(q)) THEORY */
-End.
-
 Axiom "closure differential"
    cls(q()') <-> (cls(q()))'
    /* cls(q') <-> (cls(q))' THEORY */
